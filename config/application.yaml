@@ -1,0 +1,14 @@
+app:
+  name: gin-example-001
+  description: example of a Gin web application
+  profile: default
+
+server:
+  port: 8080
+
+db:
+  url: postgres://postgres:pgdev01@localhost:15432/postgres?sslmode=disable&search_path=bookstore
+  driver: "pgx"
+  pool:
+    max: 10
+    min: 5
