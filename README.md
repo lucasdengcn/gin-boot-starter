@@ -1,6 +1,12 @@
-# Gin sample application
+# Gin boot starter application
 
 ## Overview
+
+for fast starting a application on top of Gin framework.
+
+## How to run
+
+clone this repo, and rename directory to gin001.
 
 ## Folder Structures
 
