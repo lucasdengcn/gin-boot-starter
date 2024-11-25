@@ -18,7 +18,7 @@ clone this repo, and rename directory to gin001.
 |apis/models| definition of request input models and response models | |
 |core|define application errors||
 |infra|infra resources connectivity and management||
-|infra/db| database connection | |
+|infra/db| database connection, transaction | |
 |infra/mq| MQ connection | e.g. Kafka, RabbitMQ |
 |infra/cache| cache connection | e.g. Redis |
 |jobs|schedule jobs implementation| e.g. cron job |
@@ -27,9 +27,9 @@ clone this repo, and rename directory to gin001.
 |messaging/consumers|consumer implementation, calling domain service methods||
 |migrations| database schema changes| |
 |persistence/entity| data entity mapping to database schema | |
-|persistence/repository| data handling over database | |
+|persistence/repository| data handling over database | using Context to manage transaction |
 |server | implement routers, server, CDI | |
-|services| business login implementation | |
+|services| business login implementation | using Context to manage transaction |
 |wire-config| CDI initializer | |
 
 ## Schema

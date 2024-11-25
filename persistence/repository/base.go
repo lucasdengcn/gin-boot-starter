@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"gin001/infra/db"
-	"log"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -25,7 +26,7 @@ func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *
 	if tx == nil {
 		stmt, err := repo.dbCon.Preparex(sql)
 		if err != nil {
-			log.Panicf("Preparex statement Error: %v, %v\n", sql, err)
+			log.Panic().Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
@@ -33,7 +34,7 @@ func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *
 	{
 		stmt, err := tx.Preparex(sql)
 		if err != nil {
-			log.Panicf("Preparex statement Error: %v, %v\n", sql, err)
+			log.Panic().Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
@@ -44,16 +45,16 @@ func (repo *TransactionRepo) prepareNamed(ctx context.Context, sql string) *sqlx
 	if tx == nil {
 		stmt, err := repo.dbCon.PrepareNamed(sql)
 		if err != nil {
-			log.Panicf("PrepareNamed statement Error: %v, %v\n", sql, err)
+			log.Panic().Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
 	//
 	{
-		log.Printf("Exec in tx %v\n", tx)
+		log.Debug().Msgf("Exec in tx %v", tx)
 		stmt, err := tx.PrepareNamed(sql)
 		if err != nil {
-			log.Panicf("PrepareNamed statement Error: %v, %v\n", sql, err)
+			log.Panic().Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}

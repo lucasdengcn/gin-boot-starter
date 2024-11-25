@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"gin001/config"
-	"log"
+
+	"github.com/rs/zerolog/log"
 
 	// postgresql driver
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -29,7 +29,7 @@ func ConnectDB() (*sqlx.DB, error) {
 	}
 	dbCon.SetMaxIdleConns(cfg.GetInt("db.pool.min"))
 	dbCon.SetMaxOpenConns(cfg.GetInt("db.pool.max"))
-	fmt.Println("DB Connect Successfully.")
+	log.Info().Msg("DB Connect Successfully.")
 	err = dbCon.Ping()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func GetDBCon() *sqlx.DB {
 	if dbSQL == nil {
 		dbCon, err := ConnectDB()
 		if err != nil {
-			log.Fatal("DB Connect Failed.")
+			log.Fatal().Msg("DB Connect Failed.")
 		}
 		dbCon.Ping()
 		dbSQL = dbCon
@@ -63,7 +63,7 @@ func BeginTx(ctx context.Context) context.Context {
 	if dbSQL != nil {
 		tx, err := dbSQL.BeginTxx(ctx, nil)
 		if err != nil {
-			log.Panicln("Begin Tx Error", err)
+			log.Panic().Msgf("Begin Tx Error: %v", err)
 		}
 		ctxNew := context.WithValue(ctx, txKey, tx)
 		return ctxNew
@@ -76,10 +76,10 @@ func CommitTx(ctx context.Context) context.Context {
 	dbTx := GetTx(ctx)
 	err := dbTx.Commit()
 	if err != nil {
-		log.Printf("tx Commit Error. %v\n", dbTx)
+		log.Error().Msgf("tx Commit Error. %v", dbTx)
 		panic(err)
 	}
-	log.Printf("tx Commit Success. %v\n", dbTx)
+	log.Debug().Msgf("tx Commit Success. %v", dbTx)
 	dbTx = nil
 	return context.WithValue(ctx, txKey, nil)
 }
@@ -89,9 +89,9 @@ func RollbackTx(ctx context.Context) {
 	dbTx := GetTx(ctx)
 	err := dbTx.Rollback()
 	if err != nil {
-		log.Panicf("tx Rollback Error. %v\n", dbTx)
+		log.Error().Msgf("tx Rollback Error. %v", dbTx)
 	} else {
-		log.Printf("tx Rollback Success. %v\n", dbTx)
+		log.Debug().Msgf("tx Rollback Success. %v", dbTx)
 	}
 }
 
@@ -103,7 +103,7 @@ func GetTx(ctx context.Context) *sqlx.Tx {
 	}
 	dbTx, ok := val.(*sqlx.Tx)
 	if !ok {
-		log.Panicf("Can't Convert Tx object from context. %v", dbTx)
+		log.Panic().Msgf("Can't Convert Tx object from context. %v", dbTx)
 	}
 	return dbTx
 }

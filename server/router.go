@@ -2,14 +2,30 @@ package server
 
 import (
 	"gin001/apis/controllers"
+	"gin001/core/logging"
+	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
 // NewRouter create API routers.
 func NewRouter() *gin.Engine {
+	//
+	// logger to use with gin
+	writer := zerolog.ConsoleWriter{Out: os.Stdout}
+	logger := zerolog.New(writer).With().Timestamp().Logger()
+	log.Logger = zerolog.New(writer).With().Timestamp().Logger()
+	//
 	router := gin.New()
-	router.Use(gin.Logger())
+	router.SetTrustedProxies([]string{"::1"})
+	//
+	// router.Use(gin.Logger())
+	// Add logger as a middleware
+	router.Use(logging.LoggerWithOptions(&logging.Options{Name: "App", Logger: &logger}))
+	//
 	router.Use(gin.Recovery())
 
 	router.GET("/ping", func(ctx *gin.Context) {

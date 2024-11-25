@@ -3,8 +3,9 @@ package controllers
 import (
 	"context"
 	"gin001/infra/db"
-	"log"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ import (
 type ControllerBase struct{}
 
 func (c *ControllerBase) deferTxCallback(ctx context.Context, ginContext *gin.Context, err any) {
-	log.Printf("In recover call. Err is: %v\n", err)
+	log.Debug().Msgf("In recover call. Err is: %v", err)
 	if err != nil {
 		db.RollbackTx(ctx)
 		realErr, ok := err.(error)
