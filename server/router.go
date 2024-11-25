@@ -30,7 +30,9 @@ func NewRouter() *gin.Engine {
 		//
 		userGroup.POST("/v1/signup", user.SignUp)
 		userGroup.POST("/v1/signin", user.SignIn)
+		userGroup.GET("/v1/paging/:size/:page", user.GetUsers)
 		userGroup.GET("/v1/:id", user.GetUser)
+		userGroup.PUT("/v1/:id", user.UpdateUser)
 	}
 
 	// v1 := router.Group("v1")

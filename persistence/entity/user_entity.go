@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -13,8 +12,8 @@ type UserEntity struct {
 	Password  string
 	BirthDay  *time.Time
 	Gender    string
-	PhotoURL  *sql.NullString `db:"photo_url"`
+	PhotoURL  string `db:"photo_url"`
 	Active    bool
-	CreatedAt *time.Time
-	UpdatedAt *time.Time
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
 }

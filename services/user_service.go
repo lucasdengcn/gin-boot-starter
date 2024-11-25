@@ -16,38 +16,81 @@ func NewUserService(repository *repository.UserRepository) *UserService {
 	return &UserService{userRepository: repository}
 }
 
-// GetUsers return array of UserEntity
-func (s *UserService) GetUsers() ([]entity.UserEntity, error) {
-	// implement the logic to get users from database or any other data source
-	return []entity.UserEntity{}, nil
+func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {
+	return &models.UserInfo{
+		ID:        ue.ID,
+		Name:      ue.Name,
+		BirthDay:  ue.BirthDay,
+		PhotoURL:  ue.PhotoURL,
+		Gender:    ue.Gender,
+		Email:     ue.Email,
+		CreatedAt: ue.CreatedAt,
+		UpdatedAt: ue.UpdatedAt,
+	}
 }
 
-// GetUser with id return UserEntity
-func (s *UserService) GetUser(id uint) (*models.UserInfo, error) {
-	// implement the logic to get user by id from database or any other data source
-	entity, err := s.userRepository.GetUser(id)
+// GetUsers return array of UserInfo
+func (s *UserService) GetUsers() ([]*models.UserInfo, error) {
+	// implement the logic to get users from database or any other data source
+	list, err := s.userRepository.FindUsers()
 	if err != nil {
 		return nil, err
 	}
-	return &models.UserInfo{
-		ID:       entity.ID,
-		Name:     entity.Name,
-		BirthDay: entity.BirthDay,
-		PhotoURL: entity.PhotoURL.String,
-		Gender:   entity.Gender,
-	}, nil
+	var result []*models.UserInfo
+	for _, ue := range list {
+		result = append(result, s.mapToModel(ue))
+	}
+	return result, nil
 }
 
-// CreateUser with UserEntity and return UserEntity
-func (s *UserService) CreateUser(user entity.UserEntity) (*entity.UserEntity, error) {
+// GetUser with id return UserInfo
+func (s *UserService) GetUser(id uint) (*models.UserInfo, error) {
+	// implement the logic to get user by id from database or any other data source
+	ue, err := s.userRepository.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+	return s.mapToModel(ue), nil
+}
+
+// CreateUser with UserEntity and return UserInfo
+func (s *UserService) CreateUser(signUp *models.UserSignUp) (*models.UserInfo, error) {
 	// implement the logic to create a new user in database or any other data source
-	return &user, nil
+	ue := entity.UserEntity{
+		Name:     signUp.Name,
+		PhotoURL: signUp.PhotoURL,
+		BirthDay: signUp.BirthDay,
+		Gender:   signUp.Gender,
+		Email:    signUp.Email,
+	}
+	// ueCreated, err := s.userRepository.CreateUser(&ue)
+	ueCreated, err := s.userRepository.CreateUser2(&ue)
+	if err != nil {
+		return nil, err
+	}
+	return s.mapToModel(ueCreated), nil
 }
 
-// UpdateUser with id, UserEntity, return UserEntity
-func (s *UserService) UpdateUser(id uint, user entity.UserEntity) (*entity.UserEntity, error) {
+// UpdateUser with id, UserInfoUpdate, return UserInfo
+func (s *UserService) UpdateUser(id uint, userInfoUpdate *models.UserInfoUpdate) (*models.UserInfo, error) {
 	// implement the logic to update an existing user in database or any other data source
-	return &user, nil
+	ue := entity.UserEntity{
+		ID:       id,
+		Name:     userInfoUpdate.Name,
+		PhotoURL: userInfoUpdate.PhotoURL,
+		BirthDay: userInfoUpdate.BirthDay,
+		Gender:   userInfoUpdate.Gender,
+		Email:    userInfoUpdate.Email,
+	}
+	updated, err := s.userRepository.UpdateUser(&ue)
+	if !updated || err != nil {
+		return nil, err
+	}
+	ueUpdated, err := s.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+	return ueUpdated, nil
 }
 
 // DeleteUser with id, if error will return
