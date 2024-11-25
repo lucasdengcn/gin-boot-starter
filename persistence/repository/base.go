@@ -41,7 +41,6 @@ func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *
 
 func (repo *TransactionRepo) prepareNamed(ctx context.Context, sql string) *sqlx.NamedStmt {
 	tx := db.GetTx(ctx)
-	// log.Printf("tx %v\n", tx)
 	if tx == nil {
 		stmt, err := repo.dbCon.PrepareNamed(sql)
 		if err != nil {
@@ -51,6 +50,7 @@ func (repo *TransactionRepo) prepareNamed(ctx context.Context, sql string) *sqlx
 	}
 	//
 	{
+		log.Printf("Exec in tx %v\n", tx)
 		stmt, err := tx.PrepareNamed(sql)
 		if err != nil {
 			log.Panicf("PrepareNamed statement Error: %v, %v\n", sql, err)

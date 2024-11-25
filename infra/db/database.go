@@ -79,7 +79,7 @@ func CommitTx(ctx context.Context) context.Context {
 		log.Printf("tx Commit Error. %v\n", dbTx)
 		panic(err)
 	}
-	// log.Printf("tx Commit Success. %v\n", dbTx)
+	log.Printf("tx Commit Success. %v\n", dbTx)
 	dbTx = nil
 	return context.WithValue(ctx, txKey, nil)
 }
@@ -89,10 +89,10 @@ func RollbackTx(ctx context.Context) {
 	dbTx := GetTx(ctx)
 	err := dbTx.Rollback()
 	if err != nil {
-		log.Printf("tx Rollback Error. %v\n", dbTx)
-		panic(err)
+		log.Panicf("tx Rollback Error. %v\n", dbTx)
+	} else {
+		log.Printf("tx Rollback Success. %v\n", dbTx)
 	}
-	// log.Printf("tx Rollback Success. %v\n", dbTx)
 }
 
 // GetTx return sqlx.Tx

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"gin001/apis/models"
+	"gin001/core"
 	"gin001/persistence/entity"
 	"gin001/persistence/repository"
 )
@@ -84,11 +85,15 @@ func (s *UserService) UpdateUser(ctx context.Context, id uint, userInfoUpdate *m
 		Email:    userInfoUpdate.Email,
 	}
 	updated, err := s.userRepository.UpdateUser(ctx, &ue)
-	if !updated || err != nil {
-		return nil, err
+	if err != nil {
+		panic(err)
 	}
-	// for testing transaction rollback mechanism, if panic here, UpdateUser will not rollback.
-	// panic("transaction status")
+	if !updated {
+		// simulate error
+		panic(core.NewEntityNotFoundError(id, "User not found."))
+	}
+	// for testing transaction rollback, if panic here, UpdateUser will rollback.
+	// panic(core.NewServiceError(400, "Something is wrong"))
 	ueUpdated, err := s.GetUser(ctx, id)
 	if err != nil {
 		return nil, err

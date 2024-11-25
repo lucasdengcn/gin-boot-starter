@@ -29,19 +29,10 @@ func (uc *UserController) SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// call service
-	// ctx := db.BeginTx(context.Background())
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Panicln(err)
-	// 		db.RollbackTx(ctx)
-	// 	} else {
-	// 		db.CommitTx(ctx)
-	// 	}
-	// }()
 	ctx := db.BeginTx(context.Background())
 	defer func() {
-		uc.deferCallback(ctx)
+		err := recover()
+		uc.deferTxCallback(ctx, c, err)
 	}()
 	//
 	user, err := uc.userService.CreateUser(ctx, &m)
@@ -101,18 +92,11 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// ctx := db.BeginTx(context.Background())
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Panicln(err)
-	// 		db.RollbackTx(ctx)
-	// 	} else {
-	// 		db.CommitTx(ctx)
-	// 	}
-	// }()
+	// given the request would modify data, then it should be in tx scope
 	ctx := db.BeginTx(context.Background())
 	defer func() {
-		uc.deferCallback(ctx)
+		err := recover()
+		uc.deferTxCallback(ctx, c, err)
 	}()
 	//
 	user, err := uc.userService.UpdateUser(ctx, uint(id), &m)
