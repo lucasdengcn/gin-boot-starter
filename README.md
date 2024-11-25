@@ -16,10 +16,12 @@ clone this repo, and rename directory to gin001.
 |apis/controllers| apis implementation | follow OpenAPI 3.0 specification |
 |apis/middlewares| request middleware, interceptor etc| |
 |apis/models| definition of request input models and response models | |
+|infra|infra resources connectivity and management||
 |infra/db| database connection | |
 |infra/mq| MQ connection | e.g. Kafka, RabbitMQ |
 |infra/cache| cache connection | e.g. Redis |
 |jobs|schedule jobs implementation| e.g. cron job |
+|messaging|event-driven integration between micro-services||
 |messaging/events|definition of events|follow cloud event specification|
 |messaging/consumers|consumer implementation, calling domain service methods||
 |migrations| database schema changes| |
