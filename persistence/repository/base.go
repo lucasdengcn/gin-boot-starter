@@ -21,10 +21,9 @@ func NewTransactionRepo(dbCon *sqlx.DB) TransactionRepo {
 }
 
 func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *sqlx.Stmt {
-	con := db.GetDBCon()
 	tx := db.GetTx(ctx)
 	if tx == nil {
-		stmt, err := con.Preparex(sql)
+		stmt, err := repo.dbCon.Preparex(sql)
 		if err != nil {
 			log.Panicf("Preparex statement Error: %v, %v\n", sql, err)
 		}
@@ -41,11 +40,10 @@ func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *
 }
 
 func (repo *TransactionRepo) prepareNamed(ctx context.Context, sql string) *sqlx.NamedStmt {
-	con := db.GetDBCon()
 	tx := db.GetTx(ctx)
 	// log.Printf("tx %v\n", tx)
 	if tx == nil {
-		stmt, err := con.PrepareNamed(sql)
+		stmt, err := repo.dbCon.PrepareNamed(sql)
 		if err != nil {
 			log.Panicf("PrepareNamed statement Error: %v, %v\n", sql, err)
 		}

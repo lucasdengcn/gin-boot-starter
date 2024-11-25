@@ -99,7 +99,7 @@ func RollbackTx(ctx context.Context) {
 func GetTx(ctx context.Context) *sqlx.Tx {
 	val := ctx.Value(txKey)
 	if val == nil {
-		log.Panicf("Can't Get Tx object from context(%v). %v", ctx, val)
+		return nil
 	}
 	dbTx, ok := val.(*sqlx.Tx)
 	if !ok {
