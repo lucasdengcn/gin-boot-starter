@@ -16,6 +16,7 @@ clone this repo, and rename directory to gin001.
 |apis/controllers| apis implementation | follow OpenAPI 3.0 specification |
 |apis/middlewares| request middleware, interceptor etc| |
 |apis/models| definition of request input models and response models | |
+|core|define application errors||
 |infra|infra resources connectivity and management||
 |infra/db| database connection | |
 |infra/mq| MQ connection | e.g. Kafka, RabbitMQ |

@@ -35,7 +35,7 @@ func NewEntityNotFoundError(id any, message string) *EntityNotFoundError {
 	}
 }
 
-// Error returns the error message for the ServiceError type
+// Error returns the error message for the EntityNotFoundError type
 func (e *EntityNotFoundError) Error() string {
 	return fmt.Sprintf("Error, %s, id: %v", e.ID, e.Message)
 }
