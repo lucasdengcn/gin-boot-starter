@@ -23,6 +23,17 @@ func NewUserController(UserService *services.UserService) *UserController {
 }
 
 // SignUp with user input
+// SignUp godoc
+// @Summary Create account on user demand.
+// @Tags UserController
+// @Accept application/json
+// @Produce json
+// @Param model body models.UserSignUp true "user input"
+// @Success 201 {object} models.UserInfo
+// @Failure      400  {object}  error
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router /users/v1/signup [POST]
 func (uc *UserController) SignUp(c *gin.Context) {
 	var m models.UserSignUp
 	if err := c.ShouldBind(&m); err != nil {
@@ -47,6 +58,17 @@ func (uc *UserController) SignUp(c *gin.Context) {
 }
 
 // SignIn with user input
+// SignIn godoc
+// @Summary SignIn user on user demand.
+// @Tags UserController
+// @Accept application/json
+// @Produce json
+// @Param model body models.UserSignUp true "user input"
+// @Success 200 {object} models.UserInfo
+// @Failure      400  {object}  error
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router /users/v1/signin [POST]
 func (uc *UserController) SignIn(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -54,6 +76,17 @@ func (uc *UserController) SignIn(c *gin.Context) {
 }
 
 // GetUser profile info.
+// GetUser godoc
+// @Summary Get user summary information.
+// @Tags UserController
+// @Accept application/json
+// @Produce json
+// @Param        id   path      int  true  "Account ID"
+// @Success 200 {object} models.UserInfo
+// @Failure      400  {object}  error
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router /users/v1/:id [GET]
 func (uc *UserController) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -70,6 +103,17 @@ func (uc *UserController) GetUser(c *gin.Context) {
 }
 
 // GetUsers profile info.
+// @Summary Query users in paging.
+// @Tags UserController
+// @Accept application/json
+// @Produce json
+// @Param        size   path      int  true  "amount of items to return"
+// @Param        page   path      int  true  "current page index"
+// @Success 200 {object} models.UserInfo
+// @Failure      400  {object}  error
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router /users/v1/paging/:size/:page [GET]
 func (uc *UserController) GetUsers(c *gin.Context) {
 	ctx := context.Background()
 	users, err := uc.userService.GetUsers(ctx)
@@ -81,6 +125,16 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 }
 
 // UpdateUser profile info.
+// @Summary Update user with inputs.
+// @Tags UserController
+// @Accept application/json
+// @Produce json
+// @Param model body models.UserInfoUpdate true "user info"
+// @Success 200 {object} models.UserInfo
+// @Failure      400  {object}  error
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router /users/v1/:id [PUT]
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

@@ -1,0 +1,231 @@
+basePath: /
+definitions:
+  models.UserInfo:
+    properties:
+      birthday:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      photo_url:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UserInfoUpdate:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      photo_url:
+        type: string
+    required:
+    - birthday
+    - email
+    - gender
+    - id
+    - name
+    - photo_url
+    type: object
+  models.UserSignUp:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      name:
+        type: string
+      photo_url:
+        type: string
+    required:
+    - birthday
+    - email
+    - gender
+    - name
+    - photo_url
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Gin Swagger Example API
+  version: "1.0"
+paths:
+  /users/v1/:id:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get user summary information.
+      tags:
+      - UserController
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: user info
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserInfoUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update user with inputs.
+      tags:
+      - UserController
+  /users/v1/paging/:size/:page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: amount of items to return
+        in: path
+        name: size
+        required: true
+        type: integer
+      - description: current page index
+        in: path
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Query users in paging.
+      tags:
+      - UserController
+  /users/v1/signin:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user input
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserSignUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: SignIn user on user demand.
+      tags:
+      - UserController
+  /users/v1/signup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user input
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserSignUp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create account on user demand.
+      tags:
+      - UserController
+schemes:
+- http
+swagger: "2.0"

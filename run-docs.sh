@@ -1,0 +1,1 @@
+/Users/yamingdeng/goprojects/bin/swag init -g main.go --output docs

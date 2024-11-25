@@ -3,9 +3,15 @@ package server
 import (
 	"gin001/apis/controllers"
 	"gin001/core/logging"
+
+	// server as OAS
+	_ "gin001/docs"
+
 	"os"
 
 	"github.com/rs/zerolog/log"
+	swaggerFile "github.com/swaggo/files"      // swagger embed files
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -16,8 +22,8 @@ func NewRouter() *gin.Engine {
 	//
 	// logger to use with gin
 	writer := zerolog.ConsoleWriter{Out: os.Stdout}
-	logger := zerolog.New(writer).With().Timestamp().Logger()
-	log.Logger = zerolog.New(writer).With().Timestamp().Logger()
+	logger := zerolog.New(writer).Level(zerolog.DebugLevel).With().Timestamp().Logger()
+	log.Logger = zerolog.New(writer).Level(zerolog.DebugLevel).With().Timestamp().Logger()
 	//
 	router := gin.New()
 	router.SetTrustedProxies([]string{"::1"})
@@ -59,6 +65,8 @@ func NewRouter() *gin.Engine {
 	// 		userGroup.GET("/:id", user.Retrieve)
 	// 	}
 	// }
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
 
 	return router
 }
