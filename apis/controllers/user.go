@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"context"
 	"gin001/apis/models"
+	"gin001/infra/db"
 	"gin001/services"
 	"net/http"
 	"strconv"
@@ -11,6 +13,7 @@ import (
 
 // UserController struct
 type UserController struct {
+	ControllerBase
 	userService *services.UserService
 }
 
@@ -27,11 +30,27 @@ func (uc *UserController) SignUp(c *gin.Context) {
 		return
 	}
 	// call service
-	user, err := uc.userService.CreateUser(&m)
+	// ctx := db.BeginTx(context.Background())
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		log.Panicln(err)
+	// 		db.RollbackTx(ctx)
+	// 	} else {
+	// 		db.CommitTx(ctx)
+	// 	}
+	// }()
+	ctx := db.BeginTx(context.Background())
+	defer func() {
+		uc.deferCallback(ctx)
+	}()
+	//
+	user, err := uc.userService.CreateUser(ctx, &m)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	// other service
+	// other service
 	//
 	c.JSON(http.StatusCreated, user)
 }
@@ -50,7 +69,8 @@ func (uc *UserController) GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := uc.userService.GetUser(uint(id))
+	ctx := context.Background()
+	user, err := uc.userService.GetUser(ctx, uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -60,7 +80,8 @@ func (uc *UserController) GetUser(c *gin.Context) {
 
 // GetUsers profile info.
 func (uc *UserController) GetUsers(c *gin.Context) {
-	users, err := uc.userService.GetUsers()
+	ctx := context.Background()
+	users, err := uc.userService.GetUsers(ctx)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -80,10 +101,28 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := uc.userService.UpdateUser(uint(id), &m)
+	// ctx := db.BeginTx(context.Background())
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		log.Panicln(err)
+	// 		db.RollbackTx(ctx)
+	// 	} else {
+	// 		db.CommitTx(ctx)
+	// 	}
+	// }()
+	ctx := db.BeginTx(context.Background())
+	defer func() {
+		uc.deferCallback(ctx)
+	}()
+	//
+	user, err := uc.userService.UpdateUser(ctx, uint(id), &m)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	// other service
+	// other service
+	// finally
+	//
 	c.JSON(http.StatusOK, user)
 }

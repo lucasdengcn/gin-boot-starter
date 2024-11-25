@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"gin001/config"
 	"log"
@@ -11,6 +12,10 @@ import (
 )
 
 var dbSQL *sqlx.DB
+
+type txKeyType string
+
+const txKey txKeyType = "txScoped"
 
 // ConnectDB db connections
 func ConnectDB() (*sqlx.DB, error) {
@@ -51,4 +56,54 @@ func Close() {
 	if dbSQL != nil {
 		dbSQL.Close()
 	}
+}
+
+// BeginTx return context
+func BeginTx(ctx context.Context) context.Context {
+	if dbSQL != nil {
+		tx, err := dbSQL.BeginTxx(ctx, nil)
+		if err != nil {
+			log.Panicln("Begin Tx Error", err)
+		}
+		ctxNew := context.WithValue(ctx, txKey, tx)
+		return ctxNew
+	}
+	panic("DB not init yet.")
+}
+
+// CommitTx return context
+func CommitTx(ctx context.Context) context.Context {
+	dbTx := GetTx(ctx)
+	err := dbTx.Commit()
+	if err != nil {
+		log.Printf("tx Commit Error. %v\n", dbTx)
+		panic(err)
+	}
+	// log.Printf("tx Commit Success. %v\n", dbTx)
+	dbTx = nil
+	return context.WithValue(ctx, txKey, nil)
+}
+
+// RollbackTx return error
+func RollbackTx(ctx context.Context) {
+	dbTx := GetTx(ctx)
+	err := dbTx.Rollback()
+	if err != nil {
+		log.Printf("tx Rollback Error. %v\n", dbTx)
+		panic(err)
+	}
+	// log.Printf("tx Rollback Success. %v\n", dbTx)
+}
+
+// GetTx return sqlx.Tx
+func GetTx(ctx context.Context) *sqlx.Tx {
+	val := ctx.Value(txKey)
+	if val == nil {
+		log.Panicf("Can't Get Tx object from context(%v). %v", ctx, val)
+	}
+	dbTx, ok := val.(*sqlx.Tx)
+	if !ok {
+		log.Panicf("Can't Convert Tx object from context. %v", dbTx)
+	}
+	return dbTx
 }

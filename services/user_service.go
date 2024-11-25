@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"gin001/apis/models"
 	"gin001/persistence/entity"
 	"gin001/persistence/repository"
@@ -30,9 +31,9 @@ func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {
 }
 
 // GetUsers return array of UserInfo
-func (s *UserService) GetUsers() ([]*models.UserInfo, error) {
+func (s *UserService) GetUsers(ctx context.Context) ([]*models.UserInfo, error) {
 	// implement the logic to get users from database or any other data source
-	list, err := s.userRepository.FindUsers()
+	list, err := s.userRepository.FindUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +45,9 @@ func (s *UserService) GetUsers() ([]*models.UserInfo, error) {
 }
 
 // GetUser with id return UserInfo
-func (s *UserService) GetUser(id uint) (*models.UserInfo, error) {
+func (s *UserService) GetUser(ctx context.Context, id uint) (*models.UserInfo, error) {
 	// implement the logic to get user by id from database or any other data source
-	ue, err := s.userRepository.GetUser(id)
+	ue, err := s.userRepository.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func (s *UserService) GetUser(id uint) (*models.UserInfo, error) {
 }
 
 // CreateUser with UserEntity and return UserInfo
-func (s *UserService) CreateUser(signUp *models.UserSignUp) (*models.UserInfo, error) {
+func (s *UserService) CreateUser(ctx context.Context, signUp *models.UserSignUp) (*models.UserInfo, error) {
 	// implement the logic to create a new user in database or any other data source
 	ue := entity.UserEntity{
 		Name:     signUp.Name,
@@ -64,7 +65,7 @@ func (s *UserService) CreateUser(signUp *models.UserSignUp) (*models.UserInfo, e
 		Email:    signUp.Email,
 	}
 	// ueCreated, err := s.userRepository.CreateUser(&ue)
-	ueCreated, err := s.userRepository.CreateUser2(&ue)
+	ueCreated, err := s.userRepository.CreateUser2(ctx, &ue)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,7 @@ func (s *UserService) CreateUser(signUp *models.UserSignUp) (*models.UserInfo, e
 }
 
 // UpdateUser with id, UserInfoUpdate, return UserInfo
-func (s *UserService) UpdateUser(id uint, userInfoUpdate *models.UserInfoUpdate) (*models.UserInfo, error) {
+func (s *UserService) UpdateUser(ctx context.Context, id uint, userInfoUpdate *models.UserInfoUpdate) (*models.UserInfo, error) {
 	// implement the logic to update an existing user in database or any other data source
 	ue := entity.UserEntity{
 		ID:       id,
@@ -82,11 +83,13 @@ func (s *UserService) UpdateUser(id uint, userInfoUpdate *models.UserInfoUpdate)
 		Gender:   userInfoUpdate.Gender,
 		Email:    userInfoUpdate.Email,
 	}
-	updated, err := s.userRepository.UpdateUser(&ue)
+	updated, err := s.userRepository.UpdateUser(ctx, &ue)
 	if !updated || err != nil {
 		return nil, err
 	}
-	ueUpdated, err := s.GetUser(id)
+	// for testing transaction rollback mechanism, if panic here, UpdateUser will not rollback.
+	// panic("transaction status")
+	ueUpdated, err := s.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +97,7 @@ func (s *UserService) UpdateUser(id uint, userInfoUpdate *models.UserInfoUpdate)
 }
 
 // DeleteUser with id, if error will return
-func (s *UserService) DeleteUser(id uint) error {
+func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
 	// implement the logic to delete a user from database or any other data source
 	return nil
 }
