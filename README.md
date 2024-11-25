@@ -52,3 +52,5 @@ in General, migration files should be put in a dedicated repo, and run with a de
 [yaml](https://github.com/go-yaml/yaml)
 
 [Viper](https://github.com/spf13/viper)
+
+[CDI](https://github.com/google/wire)
