@@ -9,14 +9,16 @@ import (
 )
 
 func TestDBConnectionString(t *testing.T) {
-	config.LoadConf("test")
+	var basePath = config.GetBasePath()
+	config.LoadConf(basePath, "test")
 	cfg := config.GetConfig()
-	assert.NotEmpty(t, cfg.GetString("db.url"))
+	assert.NotEmpty(t, cfg.DataSource.URL)
 }
 
 func TestDBConnection(t *testing.T) {
 	// Arrange
-	config.LoadConf("test")
+	var basePath = config.GetBasePath()
+	config.LoadConf(basePath, "test")
 	db, err := ConnectDB()
 	assert.NoError(t, err)
 	//

@@ -27,16 +27,16 @@ import (
 // @BasePath /
 // @schemes http
 func main() {
-	environment := flag.String("e", "dev", "")
+	env := flag.String("e", "dev", "")
+	cfgPath := flag.String("cfg", "", "")
 	flag.Usage = func() {
-		fmt.Println("Usage: server -e {mode}")
+		fmt.Println("Usage: server -cfg {path} -e {mode}")
 		os.Exit(1)
 	}
 	flag.Parse()
+	fmt.Printf("running in %v, env: %v\n", *cfgPath, *env)
 	// load configuration
-	config.LoadConf(*environment)
-	cfg := config.GetConfig()
-	fmt.Println(cfg.GetString("app.name"))
+	config.LoadConf(*cfgPath, *env)
 	// connect db
 	_, err := db.ConnectDB()
 	if err != nil {

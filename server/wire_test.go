@@ -8,8 +8,8 @@ import (
 )
 
 func TestDBWire(t *testing.T) {
-	config.LoadConf("test")
+	var basePath = config.GetBasePath()
+	config.LoadConf(basePath, "test")
 	uc := InitializeUserController()
 	assert.NotNil(t, uc)
-	uc.GetUser(nil)
 }

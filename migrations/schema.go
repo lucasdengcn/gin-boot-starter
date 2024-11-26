@@ -14,7 +14,7 @@ import (
 // Build DB schema
 func Build() {
 	cfg := config.GetConfig()
-	m, err := migrate.New("file://migrations/schemas", cfg.GetString("db.url"))
+	m, err := migrate.New("file://migrations/schemas", cfg.DataSource.URL)
 	if err != nil {
 		log.Fatal(err)
 	}

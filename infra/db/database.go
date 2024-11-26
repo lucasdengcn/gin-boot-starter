@@ -23,12 +23,12 @@ func ConnectDB() (*sqlx.DB, error) {
 		return dbSQL, nil
 	}
 	cfg := config.GetConfig()
-	dbCon, err := sqlx.Open("pgx", cfg.GetString("db.url"))
+	dbCon, err := sqlx.Open(cfg.DataSource.Driver, cfg.DataSource.URL)
 	if err != nil {
 		return nil, err
 	}
-	dbCon.SetMaxIdleConns(cfg.GetInt("db.pool.min"))
-	dbCon.SetMaxOpenConns(cfg.GetInt("db.pool.max"))
+	dbCon.SetMaxIdleConns(cfg.DataSource.PoolMin)
+	dbCon.SetMaxOpenConns(cfg.DataSource.PoolMax)
 	log.Info().Msg("DB Connect Successfully.")
 	err = dbCon.Ping()
 	if err != nil {

@@ -6,9 +6,13 @@ app:
 server:
   port: 8080
 
-db:
+datasource:
   url: postgres://postgres:pgdev01@localhost:15432/postgres?sslmode=disable&search_path=bookstore
   driver: "pgx"
   pool:
     max: 10
     min: 5
+
+logging:
+  format: plain # json
+  output: console # file

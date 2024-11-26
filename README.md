@@ -63,3 +63,7 @@ in General, migration files should be put in a dedicated repo, and run with a de
 [Logging](https://github.com/rs/zerolog)
 
 [RFC7807](https://tools.ietf.org/html/rfc7807)
+
+## Reference
+
+[zerolog](https://betterstack.com/community/guides/logging/zerolog/)

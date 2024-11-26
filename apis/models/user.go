@@ -19,8 +19,8 @@ type UserInfo struct {
 	Gender    string     `json:"gender,omitempty"`
 	PhotoURL  string     `json:"photo_url,omitempty"`
 	Email     string     `json:"email"`
-	CreatedAt *time.Time `json:"created_at" time_format:"2006-01-02"`
-	UpdatedAt *time.Time `json:"updated_at" time_format:"2006-01-02"`
+	CreatedAt *time.Time `json:"created_at,omitempty" time_format:"2006-01-02"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty" time_format:"2006-01-02"`
 }
 
 // UserInfoUpdate request input model

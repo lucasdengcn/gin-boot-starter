@@ -7,17 +7,20 @@ import (
 )
 
 func TestLoadConf(t *testing.T) {
-	err := LoadConf("test")
+	var basePath = GetBasePath()
+	err := LoadConf(basePath, "test")
 	assert.NoError(t, err)
 }
 
 func TestLoadConfFail(t *testing.T) {
-	err := LoadConf("non-existent-file")
+	var basePath = GetBasePath()
+	err := LoadConf(basePath, "non-existent-file")
 	assert.Error(t, err)
 }
 
 func TestConfValue(t *testing.T) {
-	LoadConf("test")
+	var basePath = GetBasePath()
+	LoadConf(basePath, "test")
 	cfg := GetConfig()
-	assert.Equal(t, "Example test", cfg.GetString("app.name"))
+	assert.Equal(t, "Example test", cfg.Application.Name)
 }
