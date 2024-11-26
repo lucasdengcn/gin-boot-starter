@@ -5,10 +5,10 @@ import "time"
 // UserSignUp request input model
 type UserSignUp struct {
 	Name     string     `json:"name" binding:"required"`
-	BirthDay *time.Time `json:"birthday,omitempty" time_format:"2006-01-02" time_utc:"1" binding:"required"`
-	Gender   string     `json:"gender" binding:"required"`
-	PhotoURL string     `json:"photo_url,omitempty" binding:"required"`
-	Email    string     `json:"email" binding:"required"`
+	BirthDay *time.Time `json:"birthday,omitempty" time_format:"2006-01-02" binding:"required"`
+	Gender   string     `json:"gender" binding:"required,gender"`
+	PhotoURL string     `json:"photo_url,omitempty" binding:"required,http_url"`
+	Email    string     `json:"email" binding:"required,email"`
 }
 
 // UserInfo response output model
@@ -27,8 +27,9 @@ type UserInfo struct {
 type UserInfoUpdate struct {
 	ID       uint       `json:"id" binding:"required"`
 	Name     string     `json:"name" binding:"required"`
-	BirthDay *time.Time `json:"birthday" time_format:"2006-01-02" time_utc:"1" binding:"required"`
-	Gender   string     `json:"gender" binding:"required"`
-	PhotoURL string     `json:"photo_url" binding:"required"`
-	Email    string     `json:"email" binding:"required"`
+	BirthDay *time.Time `json:"birthday" time_format:"2006-01-02" binding:"required"`
+	Gender   string     `json:"gender" binding:"required,gender"`
+	PhotoURL string     `json:"photo_url" binding:"required,http_url"`
+	Email    string     `json:"email" binding:"required,email"`
+	Status   string     `json:"status" binding:"required,enum=on off"`
 }

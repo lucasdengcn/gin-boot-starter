@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"gin001/config"
+	"gin001/core/validators"
 	"gin001/infra/db"
 	"io"
 	"net/http"
@@ -12,6 +13,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -27,6 +30,14 @@ func initLogging() {
 		writer = zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
 	}
 	log.Logger = zerolog.New(writer).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
+}
+
+func registerCustomValidators() {
+	v, ok := binding.Validator.Engine().(*validator.Validate)
+	if ok {
+		v.RegisterValidation("gender", validators.GenderValidator)
+		v.RegisterValidation("enum", validators.EnumValidator)
+	}
 }
 
 // Start gin server at config port
@@ -46,8 +57,8 @@ func Start() {
 	}
 	//
 	r := NewRouter()
-	// r.Run(":" + config.Server.Port)
 	//
+	registerCustomValidators()
 	// graceful restart or stop
 	//
 	srv := &http.Server{
@@ -73,7 +84,7 @@ func Start() {
 	<-quit
 	log.Info().Msg("Shutdown Server ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal().Err(err).Msg("Server Shutdown:")
