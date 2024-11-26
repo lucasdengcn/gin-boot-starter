@@ -81,6 +81,7 @@ func (u *UserRepository) FindUsers(ctx context.Context) ([]*entity.UserEntity, e
 	if err != nil {
 		return nil, err
 	}
+
 	var list []*entity.UserEntity
 	for rows.Next() {
 		var e entity.UserEntity

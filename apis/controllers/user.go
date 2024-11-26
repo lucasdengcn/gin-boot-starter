@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"gin001/apis/models"
+	"gin001/core"
 	"gin001/infra/db"
 	"gin001/services"
 	"net/http"
@@ -37,7 +38,7 @@ func NewUserController(UserService *services.UserService) *UserController {
 func (uc *UserController) SignUp(c *gin.Context) {
 	var m models.UserSignUp
 	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.NewBindingError(err, c))
 		return
 	}
 	ctx := db.BeginTx(context.Background())
@@ -46,11 +47,7 @@ func (uc *UserController) SignUp(c *gin.Context) {
 		uc.deferTxCallback(ctx, c, err)
 	}()
 	//
-	user, err := uc.userService.CreateUser(ctx, &m)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	user := uc.userService.CreateUser(ctx, &m)
 	// other service
 	// other service
 	//
@@ -90,15 +87,11 @@ func (uc *UserController) SignIn(c *gin.Context) {
 func (uc *UserController) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
 		return
 	}
 	ctx := context.Background()
-	user, err := uc.userService.GetUser(ctx, uint(id))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	user := uc.userService.GetUser(ctx, uint(id))
 	c.JSON(http.StatusOK, user)
 }
 
@@ -116,11 +109,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 // @Router /users/v1/paging/:size/:page [GET]
 func (uc *UserController) GetUsers(c *gin.Context) {
 	ctx := context.Background()
-	users, err := uc.userService.GetUsers(ctx)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	users := uc.userService.GetUsers(ctx)
 	c.JSON(http.StatusOK, users)
 }
 
@@ -138,12 +127,12 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
 		return
 	}
 	var m models.UserInfoUpdate
 	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.NewBindingError(err, c))
 		return
 	}
 	// given the request would modify data, then it should be in tx scope
@@ -153,11 +142,7 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		uc.deferTxCallback(ctx, c, err)
 	}()
 	//
-	user, err := uc.userService.UpdateUser(ctx, uint(id), &m)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	user := uc.userService.UpdateUser(ctx, uint(id), &m)
 	// other service
 	// other service
 	// finally

@@ -6,6 +6,8 @@ import (
 	"gin001/core"
 	"gin001/persistence/entity"
 	"gin001/persistence/repository"
+
+	"github.com/rs/zerolog/log"
 )
 
 // UserService interface
@@ -32,31 +34,36 @@ func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {
 }
 
 // GetUsers return array of UserInfo
-func (s *UserService) GetUsers(ctx context.Context) ([]*models.UserInfo, error) {
+func (s *UserService) GetUsers(ctx context.Context) []*models.UserInfo {
 	// implement the logic to get users from database or any other data source
 	list, err := s.userRepository.FindUsers(ctx)
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Msgf("UserRepository.FindUsers error.")
+		panic(core.NewServiceError(500, "FindUsers error", "UserRepository"))
 	}
 	var result []*models.UserInfo
 	for _, ue := range list {
 		result = append(result, s.mapToModel(ue))
 	}
-	return result, nil
+	return result
 }
 
 // GetUser with id return UserInfo
-func (s *UserService) GetUser(ctx context.Context, id uint) (*models.UserInfo, error) {
+func (s *UserService) GetUser(ctx context.Context, id uint) *models.UserInfo {
 	// implement the logic to get user by id from database or any other data source
 	ue, err := s.userRepository.GetUser(ctx, id)
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Msgf("UserRepository.GetUser error. id=%v", id)
+		panic(core.NewServiceError(500, "GetUser error", "UserRepository"))
 	}
-	return s.mapToModel(ue), nil
+	if nil == ue {
+		panic(core.NewEntityNotFoundError(id, "GetUser not found", "User"))
+	}
+	return s.mapToModel(ue)
 }
 
 // CreateUser with UserEntity and return UserInfo
-func (s *UserService) CreateUser(ctx context.Context, signUp *models.UserSignUp) (*models.UserInfo, error) {
+func (s *UserService) CreateUser(ctx context.Context, signUp *models.UserSignUp) *models.UserInfo {
 	// implement the logic to create a new user in database or any other data source
 	ue := entity.UserEntity{
 		Name:     signUp.Name,
@@ -68,13 +75,14 @@ func (s *UserService) CreateUser(ctx context.Context, signUp *models.UserSignUp)
 	// ueCreated, err := s.userRepository.CreateUser(&ue)
 	ueCreated, err := s.userRepository.CreateUser2(ctx, &ue)
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Msgf("UserRepository.CreateUser error. data: %v", signUp)
+		panic(core.NewServiceError(500, "CreateUser error", "UserRepository"))
 	}
-	return s.mapToModel(ueCreated), nil
+	return s.mapToModel(ueCreated)
 }
 
 // UpdateUser with id, UserInfoUpdate, return UserInfo
-func (s *UserService) UpdateUser(ctx context.Context, id uint, userInfoUpdate *models.UserInfoUpdate) (*models.UserInfo, error) {
+func (s *UserService) UpdateUser(ctx context.Context, id uint, userInfoUpdate *models.UserInfoUpdate) *models.UserInfo {
 	// implement the logic to update an existing user in database or any other data source
 	ue := entity.UserEntity{
 		ID:       id,
@@ -89,16 +97,12 @@ func (s *UserService) UpdateUser(ctx context.Context, id uint, userInfoUpdate *m
 		panic(err)
 	}
 	if !updated {
-		// simulate error
-		panic(core.NewEntityNotFoundError(id, "User not found."))
+		panic(core.NewEntityNotFoundError(id, "Update User not found.", "User"))
 	}
 	// for testing transaction rollback, if panic here, UpdateUser will rollback.
 	// panic(core.NewServiceError(400, "Something is wrong"))
-	ueUpdated, err := s.GetUser(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ueUpdated, nil
+	ueUpdated := s.GetUser(ctx, id)
+	return ueUpdated
 }
 
 // DeleteUser with id, if error will return

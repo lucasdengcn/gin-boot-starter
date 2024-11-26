@@ -3,6 +3,7 @@ package server
 import (
 	"gin001/apis/controllers"
 	"gin001/core/logging"
+	"gin001/core/middlewares"
 
 	// server as OAS
 	_ "gin001/docs"
@@ -32,6 +33,7 @@ func NewRouter() *gin.Engine {
 	// Add logger as a middleware
 	router.Use(logging.LoggerWithOptions(&logging.Options{Name: "App", Logger: &logger}))
 	//
+	router.Use(middlewares.ErrorHandler())
 	router.Use(gin.Recovery())
 
 	router.GET("/ping", func(ctx *gin.Context) {

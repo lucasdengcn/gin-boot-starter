@@ -14,9 +14,9 @@ clone this repo, and rename directory to gin001.
 |----|-----------|--------------|
 |config| configuration per env. including dev, sit, uat, prod etc| Yaml files |
 |apis/controllers| apis implementation | follow OpenAPI 3.0 specification |
-|apis/middlewares| request middleware, interceptor etc| |
 |apis/models| definition of request input models and response models | |
 |core|define application errors||
+|core/middlewares| request middleware, interceptor, global error handler etc| |
 |infra|infra resources connectivity and management||
 |infra/db| database connection, transaction | |
 |infra/mq| MQ connection | e.g. Kafka, RabbitMQ |
@@ -61,3 +61,5 @@ in General, migration files should be put in a dedicated repo, and run with a de
 [Open API](https://github.com/swaggo/swag)
 
 [Logging](https://github.com/rs/zerolog)
+
+[RFC7807](https://tools.ietf.org/html/rfc7807)
