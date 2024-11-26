@@ -27,7 +27,9 @@ func NewRouter() *gin.Engine {
 	//
 	router.Use(middlewares.ErrorHandler())
 	router.Use(gin.Recovery())
-
+	// Setup Security Headers
+	router.Use(middlewares.SecurityHandler())
+	//
 	router.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
 			"message": "pong",
