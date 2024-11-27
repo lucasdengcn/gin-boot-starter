@@ -30,7 +30,7 @@ func initLogging() {
 	} else {
 		writer = zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
 	}
-	log.Logger = zerolog.New(writer).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
+	log.Logger = zerolog.New(writer).With().Timestamp().Caller().Logger()
 }
 
 func registerCustomValidators() {

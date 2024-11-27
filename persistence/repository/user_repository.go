@@ -5,6 +5,7 @@ import (
 	"gin001/persistence/entity"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 )
 
 // UserRepository interface
@@ -50,6 +51,7 @@ func (u *UserRepository) CreateUser2(ctx context.Context, user *entity.UserEntit
 // GetUser with ID
 func (u *UserRepository) GetUser(ctx context.Context, id uint) (*entity.UserEntity, error) {
 	// to retrieve a user from the database or storage system based on its ID.
+	log.Debug().Msgf("GetUser with id:%v", id)
 	querySQL := "select * from users where id = $1"
 	stmt := u.prepareStatement(ctx, querySQL)
 	var entity entity.UserEntity

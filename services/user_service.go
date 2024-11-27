@@ -51,6 +51,7 @@ func (s *UserService) GetUsers(ctx context.Context) []*models.UserInfo {
 // GetUser with id return UserInfo
 func (s *UserService) GetUser(ctx context.Context, id uint) *models.UserInfo {
 	// implement the logic to get user by id from database or any other data source
+	log.Debug().Msgf("GetUser with id:%v", id)
 	ue, err := s.userRepository.GetUser(ctx, id)
 	if err != nil {
 		log.Error().Err(err).Msgf("UserRepository.GetUser error. id=%v", id)

@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 // UserController struct
@@ -90,6 +91,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
 		return
 	}
+	log.Debug().Msgf("GetUser with id:%v", id)
 	ctx := context.Background()
 	user := uc.userService.GetUser(ctx, uint(id))
 	c.JSON(http.StatusOK, user)

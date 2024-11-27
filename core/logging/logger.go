@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/xid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -27,19 +29,22 @@ type Options struct {
 }
 
 var (
-	NameFieldName       = "name"
-	HostnameFieldName   = "hostname"
-	ClientIPFieldName   = "client_ip"
-	UserAgentFieldName  = "user_agent"
-	TimestampFieldName  = zerolog.TimestampFieldName
-	DurationFieldName   = "elapsed"
-	MethodFieldName     = "method"
-	PathFieldName       = "path"
-	PayloadFieldName    = "payload"
-	RefererFieldName    = "referer"
-	statusCodeFieldName = "status_code"
-	DataLengthFieldName = "data_length"
-	BodyFieldName       = "body"
+	NameFieldName          = "name"
+	HostnameFieldName      = "hostname"
+	ClientIPFieldName      = "client_ip"
+	UserAgentFieldName     = "user_agent"
+	TimestampFieldName     = zerolog.TimestampFieldName
+	DurationFieldName      = "elapsed"
+	MethodFieldName        = "method"
+	PathFieldName          = "path"
+	PayloadFieldName       = "payload"
+	RefererFieldName       = "referer"
+	statusCodeFieldName    = "status_code"
+	DataLengthFieldName    = "data_length"
+	BodyFieldName          = "body"
+	TraceIdFieldName       = "trace_id"
+	CorrelationIdFieldName = "correlation_id"
+	SpanIdFieldName        = "span_id"
 )
 
 // Logger is a gin middleware which use zerolog
@@ -85,6 +90,10 @@ func LoggerWithOptions(opt *Options) gin.HandlerFunc {
 		if raw != "" {
 			path = path + "?" + raw
 		}
+		// parse traceId and log
+		// correlation ID, if NO TRACING then use correlation ID
+		// inject into global context
+		injectTracingIDs(ctx, z)
 
 		// Get payload from request
 		var payload []byte
@@ -211,12 +220,52 @@ func LoggerWithOptions(opt *Options) gin.HandlerFunc {
 	}
 }
 
+func injectTracingIDs(ctx *gin.Context, z *zerolog.Logger) {
+	traceparent := ctx.Request.Header.Get("traceparent")
+	traceID := ""
+	spanID := ""
+	correlationID := ""
+	if traceparent != "" {
+		parts := strings.Split(traceparent, "-")
+		if len(parts) == 4 {
+			traceID = parts[1]
+			spanID = parts[2]
+			ctx.Set(TraceIdFieldName, traceID)
+			ctx.Set(SpanIdFieldName, spanID)
+		}
+	}
+
+	if traceID == "" || spanID == "" {
+		correlationID = xid.New().String()
+		ctx.Set(CorrelationIdFieldName, correlationID)
+	}
+
+	z.UpdateContext(func(c zerolog.Context) zerolog.Context {
+		zc := c
+		if correlationID != "" {
+			zc = zc.Str(CorrelationIdFieldName, correlationID)
+		}
+		if traceID != "" {
+			zc = zc.Str(TraceIdFieldName, traceID)
+		}
+		if spanID != "" {
+			zc = zc.Str(SpanIdFieldName, spanID)
+		}
+		return zc
+	})
+	if correlationID != "" {
+		ctx.Header("X-Correlation-ID", correlationID)
+	}
+}
+
 // gormDefaultFieldsOrder defines the default order of fields
 func ginDefaultFieldsOrder() []string {
 	return []string{
 		NameFieldName,
 		HostnameFieldName,
 		ClientIPFieldName,
+		CorrelationIdFieldName,
+		TraceIdFieldName,
 		UserAgentFieldName,
 		MethodFieldName,
 		PathFieldName,
