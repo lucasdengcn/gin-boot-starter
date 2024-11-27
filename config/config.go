@@ -39,16 +39,25 @@ type Logging struct {
 	Output string
 }
 
+func value(v *viper.Viper, cfgKey, envKey string) string {
+	cfgValue := os.Getenv(envKey)
+	if cfgValue != "" {
+		return cfgValue
+	}
+	cfgValue = v.GetString(cfgKey)
+	return cfgValue
+}
+
 // LoadConf is an exported method that takes the environment starts the viper
 // (external lib) and returns the configuration struct.
-func LoadConf(basePath, env string) error {
+func LoadConf(cfgPath, env string) error {
 	var err error
 	var config *viper.Viper
 	//
 	config = viper.New()
 	config.SetConfigType("yaml")
 	config.SetConfigName("application")
-	config.AddConfigPath(basePath + "/config")
+	config.AddConfigPath(cfgPath)
 	err = config.ReadInConfig()
 	if err != nil {
 		log.Println("error on parsing default configuration file", err)
@@ -57,7 +66,7 @@ func LoadConf(basePath, env string) error {
 
 	envConfig := viper.New()
 	envConfig.SetConfigType("yaml")
-	envConfig.AddConfigPath(basePath + "/config")
+	envConfig.AddConfigPath(cfgPath)
 	envConfig.SetConfigName("application." + env)
 	err = envConfig.ReadInConfig()
 	if err != nil {
@@ -68,13 +77,13 @@ func LoadConf(basePath, env string) error {
 	//
 	_appConfig := &Configuration{
 		Application: &Application{
-			Name:        config.GetString("app.name"),
-			Description: config.GetString("app.description"),
-			Profile:     config.GetString("app.profile"),
+			Name:        value(config, "app.name", "APP_NAME"),
+			Description: value(config, "app.description", "APP_DESCRIPTION"),
+			Profile:     value(config, "app.profile", "APP_PROFILE"),
 		},
 		DataSource: &DataSource{
-			URL:     config.GetString("datasource.url"),
-			Driver:  config.GetString("datasource.driver"),
+			URL:     value(config, "datasource.url", "APP_DATASOURCE_URL"),
+			Driver:  value(config, "datasource.driver", "APP_DATASOURCE_DRIVER"),
 			PoolMax: config.GetInt("datasource.pool.max"),
 			PoolMin: config.GetInt("datasource.pool.min"),
 		},

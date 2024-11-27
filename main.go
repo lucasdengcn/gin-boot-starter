@@ -7,9 +7,15 @@ import (
 	"gin001/infra/db"
 	"gin001/migrations"
 	"gin001/server"
-	"log"
 	"os"
 )
+
+func getEnvOrFlagValue(flagValue, envVarName string) string {
+	if flagValue == "" {
+		return os.Getenv(envVarName)
+	}
+	return flagValue
+}
 
 // @title Gin Swagger Example API
 // @version 1.0
@@ -27,21 +33,22 @@ import (
 // @BasePath /
 // @schemes http
 func main() {
-	env := flag.String("e", "dev", "")
-	cfgPath := flag.String("cfg", "", "")
+	flagEnv := flag.String("e", "dev", "")
+	flagCfg := flag.String("cfg", "", "")
 	flag.Usage = func() {
 		fmt.Println("Usage: server -cfg {path} -e {mode}")
 		os.Exit(1)
 	}
 	flag.Parse()
-	fmt.Printf("running in %v, env: %v\n", *cfgPath, *env)
+	//
+	var envName = getEnvOrFlagValue(*flagEnv, "APP_ENV")
+	var cfgPath = getEnvOrFlagValue(*flagCfg, "APP_CFG")
+	//
+	fmt.Printf("running in %v, env: %v\n", cfgPath, envName)
 	// load configuration
-	config.LoadConf(*cfgPath, *env)
+	config.LoadConf(cfgPath, envName)
 	// connect db
-	_, err := db.ConnectDB()
-	if err != nil {
-		log.Fatal("DB Connect Failed.")
-	}
+	db.ConnectDB()
 	// build up db schema
 	migrations.Build()
 	server.Start()

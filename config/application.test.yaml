@@ -2,3 +2,17 @@
 app:
   name: Example test
   profile: test
+
+server:
+  port: 8080
+
+datasource:
+  url: postgres://postgres:pgdev01@postgres:5432/postgres?sslmode=disable&search_path=bookstore
+  driver: "pgx"
+  pool:
+    max: 10
+    min: 5
+
+logging:
+  format: plain # json
+  output: console # file

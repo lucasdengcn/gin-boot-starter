@@ -29,12 +29,13 @@ func ConnectDB() (*sqlx.DB, error) {
 	}
 	dbCon.SetMaxIdleConns(cfg.DataSource.PoolMin)
 	dbCon.SetMaxOpenConns(cfg.DataSource.PoolMax)
-	log.Info().Msg("DB Connect Successfully.")
 	err = dbCon.Ping()
 	if err != nil {
+		log.Fatal().Err(err).Msg("DB Ping Failed.")
 		return nil, err
 	}
 	dbSQL = dbCon
+	log.Info().Msg("DB Connect Successfully.")
 	return dbCon, nil
 }
 

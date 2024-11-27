@@ -1,8 +1,9 @@
 {
     "id": 7,
-    "name": "new name87",
+    "name": "new name2",
     "birthday": "1990-10-11T00:00:00Z",
-    "gender": "F",
+    "gender": "2",
     "photo_url": "http://www.example.com/photo/7",
-    "email": "user7@example.com"
+    "email": "user7@example.com",
+    "status": "on"
 }
