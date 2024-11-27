@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"gin001/config"
-	"gin001/infra/db"
 	"gin001/migrations"
 	"gin001/server"
 	"os"
@@ -33,6 +32,7 @@ func getEnvOrFlagValue(flagValue, envVarName string) string {
 // @BasePath /
 // @schemes http
 func main() {
+	//
 	flagEnv := flag.String("e", "dev", "")
 	flagCfg := flag.String("cfg", "", "")
 	flag.Usage = func() {
@@ -47,9 +47,8 @@ func main() {
 	fmt.Printf("running in %v, env: %v\n", cfgPath, envName)
 	// load configuration
 	config.LoadConf(cfgPath, envName)
-	// connect db
-	db.ConnectDB()
 	// build up db schema
 	migrations.Build()
+	//
 	server.Start()
 }

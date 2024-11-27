@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"gin001/config"
+	"gin001/core/otel"
 	"gin001/core/validators"
 	"gin001/infra/db"
 	"io"
@@ -50,6 +51,12 @@ func Start() {
 	//
 	initLogging()
 	//
+	// init OTEL tracing
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	//
+	otel.InitProviders(ctx)
+	//
 	_, err := db.ConnectDB()
 	if err != nil {
 		log.Fatal().Msg("DB Connection Failed.")
@@ -82,9 +89,11 @@ func Start() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	//
 	<-quit
+	//
 	log.Info().Msg("Shutdown Server ...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	otel.Shutdown(context.Background())
+	db.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal().Err(err).Msg("Server Shutdown:")

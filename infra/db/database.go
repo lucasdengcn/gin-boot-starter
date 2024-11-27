@@ -57,6 +57,7 @@ func Close() {
 	if dbSQL != nil {
 		dbSQL.Close()
 	}
+	log.Info().Msg("DB Shutdown.")
 }
 
 // BeginTx return context

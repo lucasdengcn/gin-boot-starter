@@ -1,0 +1,1 @@
+hey -n 10000 -c 100 -m GET http://localhost:8081/users/v1/7

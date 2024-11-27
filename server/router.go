@@ -2,6 +2,7 @@ package server
 
 import (
 	"gin001/apis/controllers"
+	"gin001/config"
 	"gin001/core/logging"
 	"gin001/core/middlewares"
 
@@ -13,6 +14,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 // NewRouter create API routers.
@@ -29,15 +31,10 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 	// Setup Security Headers
 	router.Use(middlewares.SecurityHandler())
+	router.Use(otelgin.Middleware(config.GetConfig().OTEL.ServiceName))
+
 	//
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
 	health := controllers.NewHealthController()
-
 	router.GET("/health", health.Status)
 
 	// router.Use(middlewares.AuthMiddleware())

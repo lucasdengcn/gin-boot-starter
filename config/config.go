@@ -15,6 +15,7 @@ type Configuration struct {
 	DataSource  *DataSource
 	Server      *Server
 	Logging     *Logging
+	OTEL        *OTEL
 }
 
 type Application struct {
@@ -37,6 +38,16 @@ type Server struct {
 type Logging struct {
 	Format string
 	Output string
+}
+
+type OTEL struct {
+	ServiceName  string
+	ServiceVer   string
+	Insecure     string
+	OTLPEndpoint string
+	Logging      bool
+	Tracer       bool
+	Metric       bool
 }
 
 func value(v *viper.Viper, cfgKey, envKey string) string {
@@ -93,6 +104,15 @@ func LoadConf(cfgPath, env string) error {
 		Logging: &Logging{
 			Format: config.GetString("logging.format"),
 			Output: config.GetString("logging.output"),
+		},
+		OTEL: &OTEL{
+			ServiceName:  value(config, "otel.service.name", "SERVICE_NAME"),
+			ServiceVer:   value(config, "otel.service.version", "SERVICE_VER"),
+			Insecure:     value(config, "otel.insecure", "INSECURE_MODE"),
+			OTLPEndpoint: value(config, "otel.exporter.endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT"),
+			Logging:      config.GetBool("otel.exporter.logging"),
+			Tracer:       config.GetBool("otel.exporter.tracer"),
+			Metric:       config.GetBool("otel.exporter.metrics"),
 		},
 	}
 	// keep in global

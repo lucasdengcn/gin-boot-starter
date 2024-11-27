@@ -16,3 +16,14 @@ datasource:
 logging:
   format: plain # json
   output: console # file
+
+otel:
+  service:
+    name: gin-001
+    version: 1.0.0
+  insecure: true
+  exporter:
+    endpoint: localhost:14317 #grpc
+    logging: true
+    tracer: true
+    metrics: true

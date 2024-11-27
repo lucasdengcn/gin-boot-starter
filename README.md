@@ -64,8 +64,12 @@ in General, migration files should be put in a dedicated repo, and run with a de
 
 [RFC7807](https://tools.ietf.org/html/rfc7807)
 
+[OTEL](https://opentelemetry.io/docs/languages/go/getting-started/)
+
 ## Reference
 
 [zerolog](https://betterstack.com/community/guides/logging/zerolog/)
 
 [validation](https://blog.logrocket.com/gin-binding-in-go-a-tutorial-with-examples/)
+
+[OTEL](https://signoz.io/blog/opentelemetry-gin/)
