@@ -5,41 +5,61 @@ import "fmt"
 // ServiceError define
 type ServiceError struct {
 	Code     int
-	Message  string
 	Instance string
+	Message  string
 }
 
 // NewServiceError creation
 func NewServiceError(code int, message, instance string) *ServiceError {
 	return &ServiceError{
 		Code:     code,
-		Message:  message,
 		Instance: instance,
+		Message:  message,
 	}
 }
 
 // Error returns the error message for the ServiceError type
 func (e *ServiceError) Error() string {
-	return fmt.Sprintf("Error at %s, %d: %s", e.Instance, e.Code, e.Message)
+	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
 }
 
 // EntityNotFoundError define
 type EntityNotFoundError struct {
 	ID       any
-	Message  string
 	Instance string
+	Message  string
 }
 
 // NewEntityNotFoundError creation
 func NewEntityNotFoundError(id any, message, instance string) *EntityNotFoundError {
 	return &EntityNotFoundError{
 		ID:       id,
-		Message:  message,
 		Instance: instance,
+		Message:  message,
 	}
 }
 
 // Error returns the error message for the EntityNotFoundError type
 func (e *EntityNotFoundError) Error() string {
-	return fmt.Sprintf("Error at %s, %s, id: %v", e.Instance, e.ID, e.Message)
+	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
+}
+
+type RepositoryError struct {
+	Code     int
+	Instance string
+	Message  string
+}
+
+// NewRepositoryError creation
+func NewRepositoryError(code int, message, instance string) *RepositoryError {
+	return &RepositoryError{
+		Code:     code,
+		Instance: instance,
+		Message:  message,
+	}
+}
+
+// Error returns the error message for the ServiceError type
+func (e *RepositoryError) Error() string {
+	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
 }

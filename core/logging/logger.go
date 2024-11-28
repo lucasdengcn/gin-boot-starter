@@ -316,35 +316,56 @@ func Get(ctx *gin.Context) *zerolog.Logger {
 
 // Trace starts a new message with trace level.
 func Trace(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Trace()
+	}
 	return Get(ctx).Trace()
 }
 
 // Debug starts a new message with debug level.
 func Debug(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Debug()
+	}
 	return Get(ctx).Debug()
 }
 
 // Info starts a new message with info level.
 func Info(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Info()
+	}
 	return Get(ctx).Info()
 }
 
 // Warn starts a new message with warn level.
 func Warn(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Warn()
+	}
 	return Get(ctx).Warn()
 }
 
 // Error starts a new message with error level.
 func Error(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Error()
+	}
 	return Get(ctx).Error()
 }
 
 // Fatal starts a new message with fatal level.
 func Fatal(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Fatal()
+	}
 	return Get(ctx).Fatal()
 }
 
 // Panic starts a new message with panic level.
 func Panic(ctx *gin.Context) *zerolog.Event {
+	if ctx == nil {
+		return log.Panic()
+	}
 	return Get(ctx).Panic()
 }

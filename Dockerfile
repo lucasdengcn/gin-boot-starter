@@ -43,6 +43,7 @@ WORKDIR /app
 COPY --from=builder /build/gin001/gin-runner .
 COPY --from=builder /build/gin001/entrypoint.sh .
 COPY --from=builder /build/gin001/config/*.yaml ./config/
+COPY --from=builder /build/gin001/config/*.pem ./config/
 COPY --from=builder /build/gin001/migrations ./migrations/
 
 EXPOSE 8080

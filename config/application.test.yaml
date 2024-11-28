@@ -14,5 +14,27 @@ datasource:
     min: 5
 
 logging:
-  format: plain # json
-  output: console # file
+  level: debug
+  format: plain # json, plain
+  output: console # console
+
+otel:
+  service:
+    name: gin-001
+    version: 1.0.0
+  insecure: true
+  exporter:
+    endpoint: localhost:14317 #grpc
+    logging: false
+    tracer: false
+    metrics: false
+
+security:
+  jwt:
+    private_key: private-key.pem # file, url
+    public_key: public-key.pem # file, url
+    algorithm: RS512
+    expiration: 60 # minutes
+    refresh_token_expiration: 72 # hours
+    token_blacklist_enabled: true
+    token_blacklist_ttl: 30 # minutes

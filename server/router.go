@@ -53,27 +53,21 @@ func NewRouter() *gin.Engine {
 	})
 	pprof.RouteRegister(debugGroup, "pprof")
 
-	// router.Use(middlewares.AuthMiddleware())
-
-	userGroup := router.Group("users")
+	userGroup := router.Group("users", middlewares.AuthJwtHandler())
 	{
 		user := InitializeUserController()
-		//
-		userGroup.POST("/v1/signup", user.SignUp)
-		userGroup.POST("/v1/signin", user.SignIn)
 		userGroup.GET("/v1/paging/:size/:page", user.GetUsers)
 		userGroup.GET("/v1/:id", user.GetUser)
 		userGroup.PUT("/v1/:id", user.UpdateUser)
+		userGroup.GET("/v1/session", user.GetCurrentUser)
 	}
 
-	// v1 := router.Group("v1")
-	// {
-	// 	userGroup := v1.Group("user")
-	// 	{
-	// 		user := new(controllers.UserController)
-	// 		userGroup.GET("/:id", user.Retrieve)
-	// 	}
-	// }
+	accountGroup := router.Group("accounts")
+	{
+		account := InitializeAccountController()
+		accountGroup.POST("/v1/signup", account.SignUp)
+		accountGroup.POST("/v1/signin", account.SignIn)
+	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
 

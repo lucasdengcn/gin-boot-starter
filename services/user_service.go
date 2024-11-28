@@ -39,7 +39,7 @@ func (s *UserService) GetUsers(c *gin.Context) []*models.UserInfo {
 	list, err := s.userRepository.FindUsers(c)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.FindUsers error.")
-		panic(core.NewServiceError(500, "FindUsers error", "UserRepository"))
+		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.FindUsers"))
 	}
 	var result []*models.UserInfo
 	for _, ue := range list {
@@ -55,10 +55,10 @@ func (s *UserService) GetUser(c *gin.Context, id uint) *models.UserInfo {
 	ue, err := s.userRepository.GetUser(c, id)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.GetUser error. id=%v", id)
-		panic(core.NewServiceError(500, "GetUser error", "UserRepository"))
+		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.GetUser"))
 	}
 	if nil == ue {
-		panic(core.NewEntityNotFoundError(id, "GetUser not found", "User"))
+		panic(core.NewEntityNotFoundError(id, "User not found", "UserRepository.GetUser"))
 	}
 	return s.mapToModel(ue)
 }
@@ -77,7 +77,7 @@ func (s *UserService) CreateUser(c *gin.Context, signUp *models.UserSignUp) *mod
 	ueCreated, err := s.userRepository.CreateUser2(c, &ue)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.CreateUser error. data: %v", signUp)
-		panic(core.NewServiceError(500, "CreateUser error", "UserRepository"))
+		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.CreateUser"))
 	}
 	return s.mapToModel(ueCreated)
 }
@@ -95,10 +95,11 @@ func (s *UserService) UpdateUser(c *gin.Context, id uint, userInfoUpdate *models
 	}
 	updated, err := s.userRepository.UpdateUser(c, &ue)
 	if err != nil {
-		panic(err)
+		logging.Error(c).Err(err).Msgf("UserRepository.UpdateUser error. data: %v", userInfoUpdate)
+		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.UpdateUser"))
 	}
 	if !updated {
-		panic(core.NewEntityNotFoundError(id, "Update User not found.", "User"))
+		panic(core.NewEntityNotFoundError(id, "User not found.", "UserRepository.UpdateUser"))
 	}
 	// for testing transaction rollback, if panic here, UpdateUser will rollback.
 	// panic(core.NewServiceError(400, "Something is wrong"))

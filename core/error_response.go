@@ -19,6 +19,8 @@ type ProblemDetails struct {
 	Detail string `json:"detail,omitempty"`
 	// Instance is a URI reference that identifies this problem.
 	Instance string `json:"instance,omitempty"`
+	//
+	Extra map[string]interface{} `json:"extra,omitempty"`
 }
 
 func NewProblemDetails(statusCode int, problemType, title, detail, instance string) *ProblemDetails {
@@ -55,7 +57,7 @@ func NewHTTPStatus(statusCode int) *ProblemDetails {
 	return NewProblemDetails(statusCode, "", "", "", "")
 }
 
-func NewValidationError(field, detail string, c *gin.Context) *ProblemDetails {
+func NewProblemValidationDetail(field, detail string, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "ValidationError",
 		Title:    "Input validation failed",
@@ -65,12 +67,81 @@ func NewValidationError(field, detail string, c *gin.Context) *ProblemDetails {
 	}
 }
 
-func NewBindingError(err error, c *gin.Context) *ProblemDetails {
+func NewProblemBindingDetail(err error, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "BindError",
 		Title:    "Failed to bind to struct",
 		Status:   http.StatusBadRequest,
 		Detail:   err.Error(),
 		Instance: c.Request.RequestURI,
+	}
+}
+
+func NewProblemAuthDetail(err error, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "AuthError",
+		Title:    "Failed to authenticate request",
+		Status:   http.StatusUnauthorized,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+	}
+}
+
+func NewProblemACLDetail(err error, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "ACLError",
+		Title:    "Failed to authorize request",
+		Status:   http.StatusForbidden,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+	}
+}
+
+func NewUnexpectedDetail(err error, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "InternalError",
+		Title:    "Failed to process request",
+		Status:   http.StatusInternalServerError,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+	}
+}
+
+func NewProblemServiceDetail(err ServiceError, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "ServiceError",
+		Title:    "Service failed to process",
+		Status:   http.StatusInternalServerError,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+		Extra: map[string]interface{}{
+			"code": err.Code,
+		},
+	}
+}
+
+func NewProblemRepositoryDetail(err RepositoryError, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "RepositoryError",
+		Title:    "Failed to execute SQL",
+		Status:   http.StatusInternalServerError,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+		Extra: map[string]interface{}{
+			"code": err.Code,
+		},
+	}
+}
+
+func NewProblem404Detail(err EntityNotFoundError, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "NotFoundError",
+		Title:    "Record not found",
+		Status:   http.StatusNotFound,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+		Extra: map[string]interface{}{
+			"id": err.ID,
+		},
 	}
 }

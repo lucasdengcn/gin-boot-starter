@@ -72,6 +72,8 @@ in General, migration files should be put in a dedicated repo, and run with a de
 
 [pprof](https://github.com/gin-contrib/pprof)
 
+[JWT](<https://github.com/golang-jwt/jwt> <https://github.com/MicahParks/keyfunc>)
+
 ### Panic or return
 
 Repository SHOULD return error, SHOULD NOT Panic.

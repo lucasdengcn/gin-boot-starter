@@ -74,6 +74,9 @@ func BeginTx(c *gin.Context) {
 // CommitTx return context
 func CommitTx(c *gin.Context) {
 	dbTx := GetTx(c)
+	if dbTx == nil {
+		return
+	}
 	err := dbTx.Commit()
 	if err != nil {
 		logging.Error(c).Msgf("tx Commit Error. %v", dbTx)
@@ -87,6 +90,9 @@ func CommitTx(c *gin.Context) {
 // RollbackTx return error
 func RollbackTx(c *gin.Context) {
 	dbTx := GetTx(c)
+	if dbTx == nil {
+		return
+	}
 	err := dbTx.Rollback()
 	if err != nil {
 		logging.Error(c).Msgf("tx Rollback Error. %v", dbTx)

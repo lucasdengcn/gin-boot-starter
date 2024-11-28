@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
@@ -16,12 +17,14 @@ type Configuration struct {
 	Server      *Server
 	Logging     *Logging
 	OTEL        *OTEL
+	Security    *Security
 }
 
 type Application struct {
 	Name        string
 	Description string
 	Profile     string
+	CfgPath     string
 }
 
 type DataSource struct {
@@ -51,6 +54,27 @@ type OTEL struct {
 	Metric       bool
 }
 
+type JWT struct {
+	/*
+			private_key: "your-secret-key"
+		    public_key: "your-secret-key"
+		    expiration_time: 10 // minutes
+		    refresh_token_expiration_time: 72 // hours
+		    token_blacklist_enabled: true
+		    token_blacklist_ttl: 30 // minutes
+	*/
+	PrivateKey                      string
+	PublicKey                       string
+	ExpirationTimeMinutes           int
+	RefreshTokenExpirationTimeHours int
+	TokenBlackListEnabled           bool
+	TokenBlackListTTL               int
+}
+
+type Security struct {
+	JWT *JWT
+}
+
 func value(v *viper.Viper, cfgKey, envKey, defaultValue string) string {
 	cfgValue := os.Getenv(envKey)
 	if cfgValue != "" {
@@ -61,6 +85,19 @@ func value(v *viper.Viper, cfgKey, envKey, defaultValue string) string {
 		return cfgValue
 	}
 	return defaultValue
+}
+
+func intValue(v *viper.Viper, cfgKey, envKey string, defaultValue int) int {
+	cfgValue := value(v, cfgKey, envKey, "")
+	if cfgValue == "" {
+		return defaultValue
+	}
+	val, err := strconv.Atoi(cfgValue)
+	if err != nil {
+		log.Printf("parse key %v, %v to int error.", cfgKey, envKey)
+		return defaultValue
+	}
+	return val
 }
 
 // LoadConf is an exported method that takes the environment starts the viper
@@ -95,6 +132,7 @@ func LoadConf(cfgPath, env string) error {
 			Name:        value(config, "app.name", "APP_NAME", "Gin demo"),
 			Description: value(config, "app.description", "APP_DESCRIPTION", ""),
 			Profile:     value(config, "app.profile", "APP_PROFILE", "dev"),
+			CfgPath:     cfgPath,
 		},
 		DataSource: &DataSource{
 			URL:     value(config, "datasource.url", "APP_DATASOURCE_URL", ""),
@@ -118,6 +156,16 @@ func LoadConf(cfgPath, env string) error {
 			Logging:      config.GetBool("otel.exporter.logging"),
 			Tracer:       config.GetBool("otel.exporter.tracer"),
 			Metric:       config.GetBool("otel.exporter.metrics"),
+		},
+		Security: &Security{
+			JWT: &JWT{
+				PrivateKey:                      value(config, "security.jwt.private_key", "", ""),
+				PublicKey:                       value(config, "security.jwt.public_key", "", ""),
+				ExpirationTimeMinutes:           intValue(config, "security.jwt.expiration", "JWT_EXPIRATION", 10),
+				RefreshTokenExpirationTimeHours: intValue(config, "security.jwt.refresh_token_expiration", "JWT_REFRESH_TOKEN_EXPIRATION", 72),
+				TokenBlackListEnabled:           true,
+				TokenBlackListTTL:               intValue(config, "security.jwt.token_blacklist_ttl", "JWT_TOKEN_BLACKLIST_TTL", 30),
+			},
 		},
 	}
 	// keep in global

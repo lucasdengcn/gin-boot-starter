@@ -9,13 +9,22 @@ import (
 	"github.com/google/wire"
 )
 
+// reuseable
 var dbSet = wire.NewSet(db.GetDBCon)
 
-// UserControllerSet of dependencies
-var UserControllerSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService, controllers.NewUserController)
+// reuseable
+var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
 
 // InitializeUserController injector
 func InitializeUserController() *controllers.UserController {
-	wire.Build(UserControllerSet)
-	return &controllers.UserController{}
+	return controllers.NewUserController(InitializeUserService())
+}
+
+func InitializeAccountController() *controllers.AccountController {
+	return controllers.NewAccountController(InitializeUserService())
+}
+
+func InitializeUserService() *services.UserService {
+	wire.Build(userServiceSet)
+	return &services.UserService{}
 }

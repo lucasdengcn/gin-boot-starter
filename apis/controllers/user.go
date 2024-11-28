@@ -4,6 +4,7 @@ import (
 	"gin001/apis/models"
 	"gin001/core"
 	"gin001/core/logging"
+	"gin001/core/security"
 	"gin001/infra/db"
 	"gin001/services"
 	"net/http"
@@ -23,53 +24,20 @@ func NewUserController(UserService *services.UserService) *UserController {
 	return &UserController{userService: UserService}
 }
 
-// SignUp with user input
-// SignUp godoc
-// @Summary Create account on user demand.
+// GetCurrentUser profile info.
+// GetCurrentUser godoc
+// @Summary Get current user information.
 // @Tags UserController
 // @Accept application/json
 // @Produce json
-// @Param model body models.UserSignUp true "user input"
-// @Success 201 {object} models.UserInfo
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router /users/v1/signup [POST]
-func (uc *UserController) SignUp(c *gin.Context) {
-	var m models.UserSignUp
-	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, core.NewBindingError(err, c))
-		return
-	}
-	db.BeginTx(c)
-	defer func() {
-		err := recover()
-		uc.deferTxCallback(c, err)
-	}()
-	//
-	user := uc.userService.CreateUser(c, &m)
-	// other service
-	// other service
-	//
-	c.JSON(http.StatusCreated, user)
-}
-
-// SignIn with user input
-// SignIn godoc
-// @Summary SignIn user on user demand.
-// @Tags UserController
-// @Accept application/json
-// @Produce json
-// @Param model body models.UserSignUp true "user input"
 // @Success 200 {object} models.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router /users/v1/signin [POST]
-func (uc *UserController) SignIn(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-	})
+// @Router /users/v1/session [GET]
+func (uc *UserController) GetCurrentUser(c *gin.Context) {
+	user := security.CurrentUser(c)
+	c.JSON(http.StatusOK, user)
 }
 
 // GetUser profile info.
@@ -87,7 +55,7 @@ func (uc *UserController) SignIn(c *gin.Context) {
 func (uc *UserController) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
+		c.JSON(http.StatusBadRequest, core.NewProblemValidationDetail("id", err.Error(), c))
 		return
 	}
 	logging.Debug(c).Msgf("GetUser with id:%v", id)
@@ -126,12 +94,12 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
+		c.JSON(http.StatusBadRequest, core.NewProblemValidationDetail("id", err.Error(), c))
 		return
 	}
 	var m models.UserInfoUpdate
 	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, core.NewBindingError(err, c))
+		c.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, c))
 		return
 	}
 	// given the request would modify data, then it should be in tx scope

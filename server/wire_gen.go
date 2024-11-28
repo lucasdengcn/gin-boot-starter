@@ -16,18 +16,28 @@ import (
 
 // Injectors from wire_injector.go:
 
-// InitializeUserController injector
-func InitializeUserController() *controllers.UserController {
+func InitializeUserService() *services.UserService {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
-	userService := services.NewUserService(userRepository)
-	userController := controllers.NewUserController(userService)
-	return userController
+	servicesUserService := services.NewUserService(userRepository)
+	return servicesUserService
 }
 
 // wire_injector.go:
 
+// reuseable
 var dbSet = wire.NewSet(db.GetDBCon)
 
-// UserControllerSet of dependencies
-var UserControllerSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService, controllers.NewUserController)
+// reuseable
+var userService *services.UserService
+
+var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
+
+// InitializeUserController injector
+func InitializeUserController() *controllers.UserController {
+	return controllers.NewUserController(InitializeUserService())
+}
+
+func InitializeAccountController() *controllers.AccountController {
+	return controllers.NewAccountController(InitializeUserService())
+}
