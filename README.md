@@ -87,3 +87,7 @@ Global Recovery/Defer function SHOULD handle error and response
 [validation](https://blog.logrocket.com/gin-binding-in-go-a-tutorial-with-examples/)
 
 [OTEL](https://signoz.io/blog/opentelemetry-gin/)
+
+## Performance Reference
+
+[DB Packages](https://blog.jetbrains.com/go/2023/04/27/comparing-db-packages/)

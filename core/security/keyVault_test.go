@@ -1,7 +1,7 @@
 package security
 
 import (
-	"gin001/config"
+	"gin-boot-starter/config"
 	"testing"
 	"time"
 

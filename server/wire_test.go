@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gin001/config"
+	"gin-boot-starter/config"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

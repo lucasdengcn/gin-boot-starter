@@ -1,7 +1,7 @@
 package security
 
 import (
-	"gin001/core/logging"
+	"gin-boot-starter/core/logging"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

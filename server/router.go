@@ -1,13 +1,13 @@
 package server
 
 import (
-	"gin001/apis/controllers"
-	"gin001/config"
-	"gin001/core/logging"
-	"gin001/core/middlewares"
+	"gin-boot-starter/apis/controllers"
+	"gin-boot-starter/config"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/core/middlewares"
 
 	// server as OAS
-	_ "gin001/docs"
+	_ "gin-boot-starter/docs"
 
 	"github.com/gin-contrib/pprof"
 

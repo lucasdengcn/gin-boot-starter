@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gin001/core/logging"
-	"gin001/persistence/entity"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/persistence/entity"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"

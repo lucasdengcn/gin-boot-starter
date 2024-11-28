@@ -3,7 +3,7 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"gin001/core"
+	"gin-boot-starter/core"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

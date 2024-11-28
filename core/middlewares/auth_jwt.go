@@ -2,9 +2,9 @@ package middlewares
 
 import (
 	"fmt"
-	"gin001/core"
-	"gin001/core/logging"
-	"gin001/core/security"
+	"gin-boot-starter/core"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/core/security"
 	"net/http"
 	"strings"
 

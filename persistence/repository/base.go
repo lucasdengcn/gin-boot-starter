@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gin001/core/logging"
-	"gin001/infra/db"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/infra/db"
 
 	"github.com/gin-gonic/gin"
 

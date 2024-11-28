@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"gin001/core"
-	"gin001/core/logging"
-	"gin001/infra/db"
+	"gin-boot-starter/core"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/infra/db"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

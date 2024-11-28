@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gin001/config"
-	"gin001/migrations"
-	"gin001/server"
+	"gin-boot-starter/config"
+	"gin-boot-starter/migrations"
+	"gin-boot-starter/server"
 	"os"
 )
 

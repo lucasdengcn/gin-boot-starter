@@ -7,10 +7,10 @@
 package server
 
 import (
-	"gin001/apis/controllers"
-	"gin001/infra/db"
-	"gin001/persistence/repository"
-	"gin001/services"
+	"gin-boot-starter/apis/controllers"
+	"gin-boot-starter/infra/db"
+	"gin-boot-starter/persistence/repository"
+	"gin-boot-starter/services"
 	"github.com/google/wire"
 )
 

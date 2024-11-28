@@ -2,7 +2,7 @@ package migrations
 
 import (
 	"errors"
-	"gin001/config"
+	"gin-boot-starter/config"
 	"log"
 
 	"github.com/golang-migrate/migrate/v4"

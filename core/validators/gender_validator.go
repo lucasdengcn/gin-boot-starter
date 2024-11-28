@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"gin001/core/enums"
+	"gin-boot-starter/core/enums"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -1,4 +1,4 @@
-module gin001
+module gin-boot-starter
 
 go 1.23.3
 

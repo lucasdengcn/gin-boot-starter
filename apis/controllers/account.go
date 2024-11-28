@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"gin001/apis/models"
-	"gin001/core"
-	"gin001/core/logging"
-	"gin001/core/security"
-	"gin001/infra/db"
-	"gin001/services"
+	"gin-boot-starter/apis/models"
+	"gin-boot-starter/core"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/core/security"
+	"gin-boot-starter/infra/db"
+	"gin-boot-starter/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

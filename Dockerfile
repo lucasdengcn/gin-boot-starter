@@ -4,8 +4,8 @@ FROM golang:${GO_VERSION}-alpine AS builder
 
 RUN apk update && apk add alpine-sdk git && rm -rf /var/cache/apk/*
 
-RUN mkdir -p /build/gin001
-WORKDIR /build/gin001
+RUN mkdir -p /build/gin-boot-starter
+WORKDIR /build/gin-boot-starter
 
 ENV GIN_MODE=release
 
@@ -40,11 +40,11 @@ ENV APP_CFG /app/config
 
 WORKDIR /app
 
-COPY --from=builder /build/gin001/gin-runner .
-COPY --from=builder /build/gin001/entrypoint.sh .
-COPY --from=builder /build/gin001/config/*.yaml ./config/
-COPY --from=builder /build/gin001/config/*.pem ./config/
-COPY --from=builder /build/gin001/migrations ./migrations/
+COPY --from=builder /build/gin-boot-starter/gin-runner .
+COPY --from=builder /build/gin-boot-starter/entrypoint.sh .
+COPY --from=builder /build/gin-boot-starter/config/*.yaml ./config/
+COPY --from=builder /build/gin-boot-starter/config/*.pem ./config/
+COPY --from=builder /build/gin-boot-starter/migrations ./migrations/
 
 EXPOSE 8080
 

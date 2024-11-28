@@ -1,8 +1,8 @@
 package db
 
 import (
-	"gin001/config"
-	"gin001/core/logging"
+	"gin-boot-starter/config"
+	"gin-boot-starter/core/logging"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"

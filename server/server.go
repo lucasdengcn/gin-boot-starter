@@ -2,10 +2,10 @@ package server
 
 import (
 	"context"
-	"gin001/config"
-	"gin001/core/otel"
-	"gin001/core/validators"
-	"gin001/infra/db"
+	"gin-boot-starter/config"
+	"gin-boot-starter/core/otel"
+	"gin-boot-starter/core/validators"
+	"gin-boot-starter/infra/db"
 	"io"
 	"net/http"
 	"os"

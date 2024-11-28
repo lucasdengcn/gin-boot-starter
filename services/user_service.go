@@ -1,11 +1,11 @@
 package services
 
 import (
-	"gin001/apis/models"
-	"gin001/core"
-	"gin001/core/logging"
-	"gin001/persistence/entity"
-	"gin001/persistence/repository"
+	"gin-boot-starter/apis/models"
+	"gin-boot-starter/core"
+	"gin-boot-starter/core/logging"
+	"gin-boot-starter/persistence/entity"
+	"gin-boot-starter/persistence/repository"
 
 	"github.com/gin-gonic/gin"
 )
