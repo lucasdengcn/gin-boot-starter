@@ -55,20 +55,14 @@ type OTEL struct {
 }
 
 type JWT struct {
-	/*
-			private_key: "your-secret-key"
-		    public_key: "your-secret-key"
-		    expiration_time: 10 // minutes
-		    refresh_token_expiration_time: 72 // hours
-		    token_blacklist_enabled: true
-		    token_blacklist_ttl: 30 // minutes
-	*/
 	PrivateKey                      string
 	PublicKey                       string
 	ExpirationTimeMinutes           int
 	RefreshTokenExpirationTimeHours int
 	TokenBlackListEnabled           bool
 	TokenBlackListTTL               int
+	Issuer                          string
+	KeyID                           string
 }
 
 type Security struct {
@@ -161,6 +155,8 @@ func LoadConf(cfgPath, env string) error {
 			JWT: &JWT{
 				PrivateKey:                      value(config, "security.jwt.private_key", "", ""),
 				PublicKey:                       value(config, "security.jwt.public_key", "", ""),
+				Issuer:                          value(config, "security.jwt.issuer", "", "issuer"),
+				KeyID:                           value(config, "security.jwt.keyId", "", "uuidv4"),
 				ExpirationTimeMinutes:           intValue(config, "security.jwt.expiration", "JWT_EXPIRATION", 10),
 				RefreshTokenExpirationTimeHours: intValue(config, "security.jwt.refresh_token_expiration", "JWT_REFRESH_TOKEN_EXPIRATION", 72),
 				TokenBlackListEnabled:           true,

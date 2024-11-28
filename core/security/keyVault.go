@@ -124,10 +124,10 @@ func SignAccessToken(sub string, aud string) (string, time.Time, error) {
 			ExpiresAt: jwt.NewNumericDate(expireTime),
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
-			Issuer:    "test",
+			Issuer:    jwtCfg.Issuer,
 			Subject:   sub,
 			Audience:  []string{aud},
-			ID:        "1",
+			ID:        jwtCfg.KeyID,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodPS256, claims)
@@ -149,10 +149,10 @@ func SignRefreshToken(sub string, aud string) (string, time.Time, error) {
 		ExpiresAt: jwt.NewNumericDate(expireTime),
 		IssuedAt:  jwt.NewNumericDate(now),
 		NotBefore: jwt.NewNumericDate(now),
-		Issuer:    "test",
+		Issuer:    jwtCfg.Issuer,
 		Subject:   sub,
 		Audience:  []string{aud},
-		ID:        "1",
+		ID:        jwtCfg.KeyID,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodPS256, claims)
 	ss, err := token.SignedString(mySigningKey)
