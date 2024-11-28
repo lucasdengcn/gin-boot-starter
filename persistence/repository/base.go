@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"context"
+	"gin001/core/logging"
 	"gin001/infra/db"
 
-	"github.com/rs/zerolog/log"
+	"github.com/gin-gonic/gin"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -21,12 +21,12 @@ func NewTransactionRepo(dbCon *sqlx.DB) TransactionRepo {
 	}
 }
 
-func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *sqlx.Stmt {
-	tx := db.GetTx(ctx)
+func (repo *TransactionRepo) prepareStatement(c *gin.Context, sql string) *sqlx.Stmt {
+	tx := db.GetTx(c)
 	if tx == nil {
 		stmt, err := repo.dbCon.Preparex(sql)
 		if err != nil {
-			log.Panic().Msgf("Preparex statement Error: %v, %v", sql, err)
+			logging.Panic(c).Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
@@ -34,27 +34,27 @@ func (repo *TransactionRepo) prepareStatement(ctx context.Context, sql string) *
 	{
 		stmt, err := tx.Preparex(sql)
 		if err != nil {
-			log.Panic().Msgf("Preparex statement Error: %v, %v", sql, err)
+			logging.Panic(c).Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
 }
 
-func (repo *TransactionRepo) prepareNamed(ctx context.Context, sql string) *sqlx.NamedStmt {
-	tx := db.GetTx(ctx)
+func (repo *TransactionRepo) prepareNamed(c *gin.Context, sql string) *sqlx.NamedStmt {
+	tx := db.GetTx(c)
 	if tx == nil {
 		stmt, err := repo.dbCon.PrepareNamed(sql)
 		if err != nil {
-			log.Panic().Msgf("PrepareNamed statement Error: %v, %v", sql, err)
+			logging.Panic(c).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
 	//
 	{
-		log.Debug().Msgf("Exec in tx %v", tx)
+		logging.Debug(c).Msgf("Exec in tx %v", tx)
 		stmt, err := tx.PrepareNamed(sql)
 		if err != nil {
-			log.Panic().Msgf("PrepareNamed statement Error: %v, %v", sql, err)
+			logging.Panic(c).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}

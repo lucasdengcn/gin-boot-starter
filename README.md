@@ -17,6 +17,10 @@ clone this repo, and rename directory to gin001.
 |apis/models| definition of request input models and response models | |
 |core|define application errors||
 |core/middlewares| request middleware, interceptor, global error handler etc| |
+|core/logging| context logger| |
+|core/otel| initializer OTEL tracer, metric, logging provider| |
+|core/validators| initialize model fields validator, e.g Gender| |
+|core/enums| define enums, e.g Gender| |
 |infra|infra resources connectivity and management||
 |infra/db| database connection, transaction | |
 |infra/mq| MQ connection | e.g. Kafka, RabbitMQ |
@@ -65,6 +69,14 @@ in General, migration files should be put in a dedicated repo, and run with a de
 [RFC7807](https://tools.ietf.org/html/rfc7807)
 
 [OTEL](https://opentelemetry.io/docs/languages/go/getting-started/)
+
+[pprof](https://github.com/gin-contrib/pprof)
+
+### Panic or return
+
+Repository SHOULD return error, SHOULD NOT Panic.
+Service SHOULD Panic.
+Global Recovery/Defer function SHOULD handle error and response
 
 ## Reference
 

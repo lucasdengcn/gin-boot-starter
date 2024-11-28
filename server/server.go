@@ -21,11 +21,16 @@ import (
 )
 
 func initLogging() {
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	format := config.GetConfig().Logging.Format
+	cfg := config.GetConfig().Logging
+	level, err := zerolog.ParseLevel(cfg.Level)
+	if err != nil {
+		log.Info().Msgf("configuration logging.level: invalid. %v", cfg.Level)
+		level = zerolog.DebugLevel
+	}
+	zerolog.SetGlobalLevel(level)
 	// logger
 	var writer io.Writer
-	if format == "json" {
+	if cfg.Format == "json" {
 		writer = os.Stdout
 	} else {
 		writer = zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}

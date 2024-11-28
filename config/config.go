@@ -36,6 +36,7 @@ type Server struct {
 }
 
 type Logging struct {
+	Level  string
 	Format string
 	Output string
 }
@@ -50,13 +51,16 @@ type OTEL struct {
 	Metric       bool
 }
 
-func value(v *viper.Viper, cfgKey, envKey string) string {
+func value(v *viper.Viper, cfgKey, envKey, defaultValue string) string {
 	cfgValue := os.Getenv(envKey)
 	if cfgValue != "" {
 		return cfgValue
 	}
 	cfgValue = v.GetString(cfgKey)
-	return cfgValue
+	if cfgValue != "" {
+		return cfgValue
+	}
+	return defaultValue
 }
 
 // LoadConf is an exported method that takes the environment starts the viper
@@ -88,13 +92,13 @@ func LoadConf(cfgPath, env string) error {
 	//
 	_appConfig := &Configuration{
 		Application: &Application{
-			Name:        value(config, "app.name", "APP_NAME"),
-			Description: value(config, "app.description", "APP_DESCRIPTION"),
-			Profile:     value(config, "app.profile", "APP_PROFILE"),
+			Name:        value(config, "app.name", "APP_NAME", "Gin demo"),
+			Description: value(config, "app.description", "APP_DESCRIPTION", ""),
+			Profile:     value(config, "app.profile", "APP_PROFILE", "dev"),
 		},
 		DataSource: &DataSource{
-			URL:     value(config, "datasource.url", "APP_DATASOURCE_URL"),
-			Driver:  value(config, "datasource.driver", "APP_DATASOURCE_DRIVER"),
+			URL:     value(config, "datasource.url", "APP_DATASOURCE_URL", ""),
+			Driver:  value(config, "datasource.driver", "APP_DATASOURCE_DRIVER", ""),
 			PoolMax: config.GetInt("datasource.pool.max"),
 			PoolMin: config.GetInt("datasource.pool.min"),
 		},
@@ -102,14 +106,15 @@ func LoadConf(cfgPath, env string) error {
 			Port: config.GetString("server.port"),
 		},
 		Logging: &Logging{
+			Level:  value(config, "logging.level", "APP_LOGGING_LEVEL", "debug"),
 			Format: config.GetString("logging.format"),
 			Output: config.GetString("logging.output"),
 		},
 		OTEL: &OTEL{
-			ServiceName:  value(config, "otel.service.name", "SERVICE_NAME"),
-			ServiceVer:   value(config, "otel.service.version", "SERVICE_VER"),
-			Insecure:     value(config, "otel.insecure", "INSECURE_MODE"),
-			OTLPEndpoint: value(config, "otel.exporter.endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT"),
+			ServiceName:  value(config, "otel.service.name", "SERVICE_NAME", "gin-demo"),
+			ServiceVer:   value(config, "otel.service.version", "SERVICE_VER", "0.0.0"),
+			Insecure:     value(config, "otel.insecure", "INSECURE_MODE", "true"),
+			OTLPEndpoint: value(config, "otel.exporter.endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
 			Logging:      config.GetBool("otel.exporter.logging"),
 			Tracer:       config.GetBool("otel.exporter.tracer"),
 			Metric:       config.GetBool("otel.exporter.metrics"),

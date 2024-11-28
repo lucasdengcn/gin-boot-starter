@@ -1,9 +1,10 @@
 package db
 
 import (
-	"context"
 	"gin001/config"
+	"gin001/core/logging"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
 	// postgresql driver
@@ -13,9 +14,7 @@ import (
 
 var dbSQL *sqlx.DB
 
-type txKeyType string
-
-const txKey txKeyType = "txScoped"
+const txKey string = "txScoped"
 
 // ConnectDB db connections
 func ConnectDB() (*sqlx.DB, error) {
@@ -61,51 +60,50 @@ func Close() {
 }
 
 // BeginTx return context
-func BeginTx(ctx context.Context) context.Context {
-	if dbSQL != nil {
-		tx, err := dbSQL.BeginTxx(ctx, nil)
-		if err != nil {
-			log.Panic().Msgf("Begin Tx Error: %v", err)
-		}
-		ctxNew := context.WithValue(ctx, txKey, tx)
-		return ctxNew
+func BeginTx(c *gin.Context) {
+	if dbSQL == nil {
+		panic("DB not init yet.")
 	}
-	panic("DB not init yet.")
+	tx, err := dbSQL.BeginTxx(c, nil)
+	if err != nil {
+		logging.Panic(c).Msgf("Begin Tx Error: %v", err)
+	}
+	c.Set(txKey, tx)
 }
 
 // CommitTx return context
-func CommitTx(ctx context.Context) context.Context {
-	dbTx := GetTx(ctx)
+func CommitTx(c *gin.Context) {
+	dbTx := GetTx(c)
 	err := dbTx.Commit()
 	if err != nil {
-		log.Error().Msgf("tx Commit Error. %v", dbTx)
+		logging.Error(c).Msgf("tx Commit Error. %v", dbTx)
 		panic(err)
 	}
-	log.Debug().Msgf("tx Commit Success. %v", dbTx)
+	logging.Debug(c).Msgf("tx Commit Success. %v", dbTx)
 	dbTx = nil
-	return context.WithValue(ctx, txKey, nil)
+	c.Set(txKey, nil)
 }
 
 // RollbackTx return error
-func RollbackTx(ctx context.Context) {
-	dbTx := GetTx(ctx)
+func RollbackTx(c *gin.Context) {
+	dbTx := GetTx(c)
 	err := dbTx.Rollback()
 	if err != nil {
-		log.Error().Msgf("tx Rollback Error. %v", dbTx)
+		logging.Error(c).Msgf("tx Rollback Error. %v", dbTx)
 	} else {
-		log.Debug().Msgf("tx Rollback Success. %v", dbTx)
+		logging.Debug(c).Msgf("tx Rollback Success. %v", dbTx)
 	}
 }
 
 // GetTx return sqlx.Tx
-func GetTx(ctx context.Context) *sqlx.Tx {
-	val := ctx.Value(txKey)
-	if val == nil {
+func GetTx(c *gin.Context) *sqlx.Tx {
+	val, exists := c.Get(txKey)
+	if val == nil || !exists {
 		return nil
 	}
 	dbTx, ok := val.(*sqlx.Tx)
 	if !ok {
-		log.Panic().Msgf("Can't Convert Tx object from context. %v", dbTx)
+		logging.Panic(c).Msgf("Can't Convert Tx object from context. %v", dbTx)
 	}
 	return dbTx
 }

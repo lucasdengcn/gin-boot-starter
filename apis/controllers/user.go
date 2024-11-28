@@ -1,16 +1,15 @@
 package controllers
 
 import (
-	"context"
 	"gin001/apis/models"
 	"gin001/core"
+	"gin001/core/logging"
 	"gin001/infra/db"
 	"gin001/services"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 // UserController struct
@@ -42,13 +41,13 @@ func (uc *UserController) SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, core.NewBindingError(err, c))
 		return
 	}
-	ctx := db.BeginTx(context.Background())
+	db.BeginTx(c)
 	defer func() {
 		err := recover()
-		uc.deferTxCallback(ctx, c, err)
+		uc.deferTxCallback(c, err)
 	}()
 	//
-	user := uc.userService.CreateUser(ctx, &m)
+	user := uc.userService.CreateUser(c, &m)
 	// other service
 	// other service
 	//
@@ -91,9 +90,8 @@ func (uc *UserController) GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, core.NewValidationError("id", err.Error(), c))
 		return
 	}
-	log.Debug().Msgf("GetUser with id:%v", id)
-	ctx := context.Background()
-	user := uc.userService.GetUser(ctx, uint(id))
+	logging.Debug(c).Msgf("GetUser with id:%v", id)
+	user := uc.userService.GetUser(c, uint(id))
 	c.JSON(http.StatusOK, user)
 }
 
@@ -110,8 +108,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 // @Failure      500  {object}  error
 // @Router /users/v1/paging/:size/:page [GET]
 func (uc *UserController) GetUsers(c *gin.Context) {
-	ctx := context.Background()
-	users := uc.userService.GetUsers(ctx)
+	users := uc.userService.GetUsers(c)
 	c.JSON(http.StatusOK, users)
 }
 
@@ -138,13 +135,13 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 	// given the request would modify data, then it should be in tx scope
-	ctx := db.BeginTx(context.Background())
+	db.BeginTx(c)
 	defer func() {
 		err := recover()
-		uc.deferTxCallback(ctx, c, err)
+		uc.deferTxCallback(c, err)
 	}()
 	//
-	user := uc.userService.UpdateUser(ctx, uint(id), &m)
+	user := uc.userService.UpdateUser(c, uint(id), &m)
 	// other service
 	// other service
 	// finally

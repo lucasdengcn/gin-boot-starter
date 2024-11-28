@@ -13,6 +13,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const loggerKey = "_zero_logger_"
+
 // Options for logger
 type Options struct {
 	//
@@ -46,14 +48,6 @@ var (
 	CorrelationIdFieldName = "correlation_id"
 	SpanIdFieldName        = "span_id"
 )
-
-// Logger is a gin middleware which use zerolog
-func Logger() gin.HandlerFunc {
-	o := &Options{
-		FieldsOrder: ginDefaultFieldsOrder(),
-	}
-	return LoggerWithOptions(o)
-}
 
 // LoggerWithOptions is a gin middleware which use zerolog
 func LoggerWithOptions(opt *Options) gin.HandlerFunc {
@@ -93,7 +87,8 @@ func LoggerWithOptions(opt *Options) gin.HandlerFunc {
 		// parse traceId and log
 		// correlation ID, if NO TRACING then use correlation ID
 		// inject into global context
-		injectTracingIDs(ctx, z)
+
+		l := buildContextLogger(ctx, z)
 
 		// Get payload from request
 		var payload []byte
@@ -121,12 +116,12 @@ func LoggerWithOptions(opt *Options) gin.HandlerFunc {
 		// set message level
 		if statusCode >= 400 && statusCode < 500 {
 			eventWarn = true
-			event = z.Warn()
+			event = l.Warn()
 		} else if statusCode >= 500 {
 			eventError = true
-			event = z.Error()
+			event = l.Error()
 		} else {
-			event = z.Trace()
+			event = l.Trace()
 		}
 
 		// add fields
@@ -217,10 +212,13 @@ func LoggerWithOptions(opt *Options) gin.HandlerFunc {
 		} else {
 			event.Msg(message)
 		}
+		// Clean
+		ctx.Set(loggerKey, nil)
 	}
 }
 
-func injectTracingIDs(ctx *gin.Context, z *zerolog.Logger) {
+func buildContextLogger(ctx *gin.Context, z *zerolog.Logger) zerolog.Logger {
+	l := z.With().Logger()
 	traceparent := ctx.Request.Header.Get("traceparent")
 	traceID := ""
 	spanID := ""
@@ -240,7 +238,7 @@ func injectTracingIDs(ctx *gin.Context, z *zerolog.Logger) {
 		ctx.Set(CorrelationIdFieldName, correlationID)
 	}
 
-	z.UpdateContext(func(c zerolog.Context) zerolog.Context {
+	l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 		zc := c
 		if correlationID != "" {
 			zc = zc.Str(CorrelationIdFieldName, correlationID)
@@ -256,6 +254,8 @@ func injectTracingIDs(ctx *gin.Context, z *zerolog.Logger) {
 	if correlationID != "" {
 		ctx.Header("X-Correlation-ID", correlationID)
 	}
+	ctx.Set(loggerKey, l)
+	return l
 }
 
 // gormDefaultFieldsOrder defines the default order of fields
@@ -306,4 +306,45 @@ func (r responseBodyWriter) Write(b []byte) (int, error) {
 func (r responseBodyWriter) WriteString(s string) (n int, err error) {
 	r.body.WriteString(s)
 	return r.ResponseWriter.WriteString(s)
+}
+
+// Get context logger
+func Get(ctx *gin.Context) *zerolog.Logger {
+	l := ctx.MustGet(loggerKey).(zerolog.Logger)
+	return &l
+}
+
+// Trace starts a new message with trace level.
+func Trace(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Trace()
+}
+
+// Debug starts a new message with debug level.
+func Debug(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Debug()
+}
+
+// Info starts a new message with info level.
+func Info(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Info()
+}
+
+// Warn starts a new message with warn level.
+func Warn(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Warn()
+}
+
+// Error starts a new message with error level.
+func Error(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Error()
+}
+
+// Fatal starts a new message with fatal level.
+func Fatal(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Fatal()
+}
+
+// Panic starts a new message with panic level.
+func Panic(ctx *gin.Context) *zerolog.Event {
+	return Get(ctx).Panic()
 }

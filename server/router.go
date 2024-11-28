@@ -9,6 +9,8 @@ import (
 	// server as OAS
 	_ "gin001/docs"
 
+	"github.com/gin-contrib/pprof"
+
 	"github.com/rs/zerolog/log"
 	swaggerFile "github.com/swaggo/files"      // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
@@ -40,6 +42,16 @@ func NewRouter() *gin.Engine {
 	//
 	health := controllers.NewHealthController()
 	router.GET("/health", health.Status)
+
+	// pprof
+	debugGroup := router.Group("/debug", func(c *gin.Context) {
+		// if c.Request.Header.Get("Authorization") != "foobar" {
+		// 	c.AbortWithStatus(http.StatusForbidden)
+		// 	return
+		// }
+		c.Next()
+	})
+	pprof.RouteRegister(debugGroup, "pprof")
 
 	// router.Use(middlewares.AuthMiddleware())
 
