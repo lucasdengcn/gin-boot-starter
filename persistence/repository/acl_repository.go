@@ -4,6 +4,7 @@ import (
 	"gin-boot-starter/config"
 	"gin-boot-starter/core"
 	"gin-boot-starter/core/logging"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -12,6 +13,9 @@ import (
 	sqlxadapter "github.com/memwey/casbin-sqlx-adapter"
 )
 
+var onceAclRepository sync.Once
+var instanceAclRepository *AclRepository
+
 type AclRepository struct {
 	TransactionRepo
 	enforcer *casbin.Enforcer
@@ -19,22 +23,25 @@ type AclRepository struct {
 
 func NewAclRepository(dbCon *sqlx.DB) *AclRepository {
 	// init adapter with existing connection
-	opts := &sqlxadapter.AdapterOptions{
-		DB:        dbCon,
-		TableName: "casbin_rule",
-	}
-	a := sqlxadapter.NewAdapterFromOptions(opts)
-	//
-	path := config.GetConfig().Application.CfgPath + "/rbac_model.conf"
-	e, err := casbin.NewEnforcer(path, a)
-	if err != nil {
-		logging.Fatal(nil).Err(err).Msg("Init casbin enforcer Error.")
-	}
+	onceAclRepository.Do(func() {
+		opts := &sqlxadapter.AdapterOptions{
+			DB:        dbCon,
+			TableName: "casbin_rule",
+		}
+		a := sqlxadapter.NewAdapterFromOptions(opts)
+		//
+		path := config.GetConfig().Application.CfgPath + "/rbac_model.conf"
+		e, err := casbin.NewEnforcer(path, a)
+		if err != nil {
+			logging.Fatal(nil).Err(err).Msg("Init casbin enforcer Error.")
+		}
 
-	return &AclRepository{
-		TransactionRepo: NewTransactionRepo(dbCon),
-		enforcer:        e,
-	}
+		instanceAclRepository = &AclRepository{
+			TransactionRepo: NewTransactionRepo(dbCon),
+			enforcer:        e,
+		}
+	})
+	return instanceAclRepository
 }
 
 // AssignRole to user

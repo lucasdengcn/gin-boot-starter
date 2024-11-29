@@ -7,9 +7,13 @@ import (
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/persistence/entity"
 	"gin-boot-starter/persistence/repository"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
+
+var onceUserService sync.Once
+var instanceUserService *UserService
 
 // UserService interface
 type UserService struct {
@@ -18,7 +22,10 @@ type UserService struct {
 
 // NewUserService with repository
 func NewUserService(repository *repository.UserRepository) *UserService {
-	return &UserService{userRepository: repository}
+	onceUserService.Do(func() {
+		instanceUserService = &UserService{userRepository: repository}
+	})
+	return instanceUserService
 }
 
 func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {

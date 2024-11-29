@@ -61,13 +61,19 @@ func (c *AccountController) SignUp(ctx *gin.Context) {
 // @Tags AccountController
 // @Accept application/json
 // @Produce json
-// @Param model body models.UserSignUp true "user input"
-// @Success 200 {object} models.UserInfo
+// @Param model body models.UserSignIn true "user input"
+// @Success 200 {object} models.AuthTokens
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router /accounts/v1/signin [POST]
 func (c *AccountController) SignIn(ctx *gin.Context) {
+	//
+	var m models.UserSignIn
+	if err := ctx.ShouldBind(&m); err != nil {
+		ctx.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, ctx))
+		return
+	}
 	//
 	accessToken, expireTime, err := security.SignAccessToken("1", "web")
 	if err != nil {

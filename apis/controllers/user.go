@@ -17,11 +17,12 @@ import (
 type UserController struct {
 	ControllerBase
 	userService *services.UserService
+	aclService  *services.AclService
 }
 
 // NewUserController with dependencies services
-func NewUserController(UserService *services.UserService) *UserController {
-	return &UserController{userService: UserService}
+func NewUserController(UserService *services.UserService, AclService *services.AclService) *UserController {
+	return &UserController{userService: UserService, aclService: AclService}
 }
 
 // GetCurrentUser profile info.
@@ -35,9 +36,10 @@ func NewUserController(UserService *services.UserService) *UserController {
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router /users/v1/session [GET]
-func (uc *UserController) GetCurrentUser(c *gin.Context) {
-	user := security.CurrentUser(c)
-	c.JSON(http.StatusOK, user)
+func (uc *UserController) GetCurrentUser(ctx *gin.Context) {
+	//
+	user := security.CurrentUser(ctx)
+	ctx.JSON(http.StatusOK, user)
 }
 
 // GetUser profile info.

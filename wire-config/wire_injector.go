@@ -9,29 +9,33 @@ import (
 	"github.com/google/wire"
 )
 
-// reuseable
+// ProviderSet
 var dbSet = wire.NewSet(db.GetDBCon)
 
-var aclServiceSet = wire.NewSet(dbSet, repository.NewAclRepository, services.NewAclService)
+// ProviderSet
+var aclServiceSet = wire.NewSet(repository.NewAclRepository, services.NewAclService)
 
-// reuseable
-var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
+// ProviderSet
+var userServiceSet = wire.NewSet(repository.NewUserRepository, services.NewUserService)
 
 // InitializeUserController injector
 func InitializeUserController() *controllers.UserController {
-	return controllers.NewUserController(InitializeUserService())
+	wire.Build(dbSet, userServiceSet, aclServiceSet, controllers.NewUserController)
+	return &controllers.UserController{}
 }
 
 func InitializeAccountController() *controllers.AccountController {
-	return controllers.NewAccountController(InitializeUserService(), InitializeAclService())
+	wire.Build(dbSet, userServiceSet, aclServiceSet, controllers.NewAccountController)
+	return &controllers.AccountController{}
 }
 
 func InitializeUserService() *services.UserService {
-	wire.Build(userServiceSet)
+	wire.Build(dbSet, userServiceSet)
 	return &services.UserService{}
 }
 
+// InitializeAclService injector
 func InitializeAclService() *services.AclService {
-	wire.Build(aclServiceSet)
+	wire.Build(dbSet, aclServiceSet)
 	return &services.AclService{}
 }

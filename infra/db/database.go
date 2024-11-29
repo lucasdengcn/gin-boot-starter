@@ -3,6 +3,7 @@ package db
 import (
 	"gin-boot-starter/config"
 	"gin-boot-starter/core/logging"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -11,6 +12,8 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
+
+var once sync.Once
 
 var dbSQL *sqlx.DB
 
@@ -21,21 +24,24 @@ func ConnectDB() (*sqlx.DB, error) {
 	if dbSQL != nil {
 		return dbSQL, nil
 	}
-	cfg := config.GetConfig()
-	dbCon, err := sqlx.Open(cfg.DataSource.Driver, cfg.DataSource.URL)
-	if err != nil {
-		return nil, err
-	}
-	dbCon.SetMaxIdleConns(cfg.DataSource.PoolMin)
-	dbCon.SetMaxOpenConns(cfg.DataSource.PoolMax)
-	err = dbCon.Ping()
-	if err != nil {
-		log.Fatal().Err(err).Msg("DB Ping Failed.")
-		return nil, err
-	}
-	dbSQL = dbCon
-	log.Info().Msg("DB Connect Successfully.")
-	return dbCon, nil
+	var err error = nil
+	once.Do(func() {
+		cfg := config.GetConfig()
+		dbCon, err := sqlx.Open(cfg.DataSource.Driver, cfg.DataSource.URL)
+		if err != nil {
+			return
+		}
+		dbCon.SetMaxIdleConns(cfg.DataSource.PoolMin)
+		dbCon.SetMaxOpenConns(cfg.DataSource.PoolMax)
+		err = dbCon.Ping()
+		if err != nil {
+			log.Fatal().Err(err).Msg("DB Ping Failed.")
+			return
+		}
+		dbSQL = dbCon
+		log.Info().Msg("DB Connect Successfully.")
+	})
+	return dbSQL, err
 }
 
 // GetDBCon provider return db instance
@@ -45,8 +51,7 @@ func GetDBCon() *sqlx.DB {
 		if err != nil {
 			log.Fatal().Msg("DB Connect Failed.")
 		}
-		dbCon.Ping()
-		dbSQL = dbCon
+		return dbCon
 	}
 	return dbSQL
 }

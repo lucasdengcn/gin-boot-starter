@@ -16,6 +16,27 @@ import (
 
 // Injectors from wire_injector.go:
 
+// InitializeUserController injector
+func InitializeUserController() *controllers.UserController {
+	sqlxDB := db.GetDBCon()
+	userRepository := repository.NewUserRepository(sqlxDB)
+	userService := services.NewUserService(userRepository)
+	aclRepository := repository.NewAclRepository(sqlxDB)
+	aclService := services.NewAclService(aclRepository)
+	userController := controllers.NewUserController(userService, aclService)
+	return userController
+}
+
+func InitializeAccountController() *controllers.AccountController {
+	sqlxDB := db.GetDBCon()
+	userRepository := repository.NewUserRepository(sqlxDB)
+	userService := services.NewUserService(userRepository)
+	aclRepository := repository.NewAclRepository(sqlxDB)
+	aclService := services.NewAclService(aclRepository)
+	accountController := controllers.NewAccountController(userService, aclService)
+	return accountController
+}
+
 func InitializeUserService() *services.UserService {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
@@ -23,6 +44,7 @@ func InitializeUserService() *services.UserService {
 	return userService
 }
 
+// InitializeAclService injector
 func InitializeAclService() *services.AclService {
 	sqlxDB := db.GetDBCon()
 	aclRepository := repository.NewAclRepository(sqlxDB)
@@ -32,19 +54,11 @@ func InitializeAclService() *services.AclService {
 
 // wire_injector.go:
 
-// reuseable
+// ProviderSet
 var dbSet = wire.NewSet(db.GetDBCon)
 
-var aclServiceSet = wire.NewSet(dbSet, repository.NewAclRepository, services.NewAclService)
+// ProviderSet
+var aclServiceSet = wire.NewSet(repository.NewAclRepository, services.NewAclService)
 
-// reuseable
-var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
-
-// InitializeUserController injector
-func InitializeUserController() *controllers.UserController {
-	return controllers.NewUserController(InitializeUserService())
-}
-
-func InitializeAccountController() *controllers.AccountController {
-	return controllers.NewAccountController(InitializeUserService(), InitializeAclService())
-}
+// ProviderSet
+var userServiceSet = wire.NewSet(repository.NewUserRepository, services.NewUserService)

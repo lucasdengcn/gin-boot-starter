@@ -3,10 +3,14 @@ package repository
 import (
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/persistence/entity"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
+
+var onceUserRepository sync.Once
+var instanceUserRepository *UserRepository
 
 // UserRepository interface
 type UserRepository struct {
@@ -15,9 +19,12 @@ type UserRepository struct {
 
 // NewUserRepository with DB connection
 func NewUserRepository(dbCon *sqlx.DB) *UserRepository {
-	return &UserRepository{
-		TransactionRepo: NewTransactionRepo(dbCon),
-	}
+	onceUserRepository.Do(func() {
+		instanceUserRepository = &UserRepository{
+			TransactionRepo: NewTransactionRepo(dbCon),
+		}
+	})
+	return instanceUserRepository
 }
 
 // CreateUser with userEntity

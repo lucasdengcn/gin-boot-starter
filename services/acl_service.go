@@ -5,9 +5,13 @@ import (
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/persistence/repository"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
+
+var onceAclService sync.Once
+var instanceAclService *AclService
 
 type AclService struct {
 	aclRepository *repository.AclRepository
@@ -15,9 +19,12 @@ type AclService struct {
 
 // NewAclService with repository
 func NewAclService(aclRepository *repository.AclRepository) *AclService {
-	return &AclService{
-		aclRepository: aclRepository,
-	}
+	onceAclService.Do(func() {
+		instanceAclService = &AclService{
+			aclRepository: aclRepository,
+		}
+	})
+	return instanceAclService
 }
 
 // SetForNewUser to user

@@ -12,6 +12,12 @@ type UserSignUp struct {
 	Password string     `json:"password" binding:"required"`
 }
 
+// UserSignIn request input model
+type UserSignIn struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
 // UserInfo response output model
 type UserInfo struct {
 	ID        uint       `json:"id"`
