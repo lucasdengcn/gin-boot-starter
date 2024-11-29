@@ -69,6 +69,20 @@ func (u *UserRepository) GetUser(c *gin.Context, id uint) (*entity.UserEntity, e
 	return &entity, nil
 }
 
+// GetUserByEmail with Email
+func (u *UserRepository) GetUserByEmail(c *gin.Context, email string) (*entity.UserEntity, error) {
+	// to retrieve a user from the database or storage system based on its ID.
+	logging.Debug(c).Msgf("GetUserByEmail with email:%v", email)
+	querySQL := "select * from users where email = $1"
+	stmt := u.prepareStatement(c, querySQL)
+	var entity entity.UserEntity
+	err := stmt.Get(&entity, email)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
 // UpdateUser with userEntity
 func (u *UserRepository) UpdateUser(c *gin.Context, user *entity.UserEntity) (bool, error) {
 	sql := "update users set name = :name, birthday = :birthday, gender = :gender, photo_url = :photo_url, email = :email where id = :id"

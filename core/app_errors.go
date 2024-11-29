@@ -2,6 +2,7 @@ package core
 
 import "fmt"
 
+// //////////////
 // ServiceError define
 type ServiceError struct {
 	Code     int
@@ -23,6 +24,7 @@ func (e *ServiceError) Error() string {
 	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
 }
 
+// //////////////
 // EntityNotFoundError define
 type EntityNotFoundError struct {
 	ID       any
@@ -44,6 +46,7 @@ func (e *EntityNotFoundError) Error() string {
 	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
 }
 
+// //////////////
 type RepositoryError struct {
 	Code     int
 	Instance string
@@ -61,5 +64,26 @@ func NewRepositoryError(code int, message, instance string) *RepositoryError {
 
 // Error returns the error message for the ServiceError type
 func (e *RepositoryError) Error() string {
+	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
+}
+
+// //////////////
+type SecurityError struct {
+	Code     int
+	Instance string
+	Message  string
+}
+
+// NewSecurityError creation
+func NewSecurityError(code int, message, instance string) *SecurityError {
+	return &SecurityError{
+		Code:     code,
+		Instance: instance,
+		Message:  message,
+	}
+}
+
+// Error returns the error message for the ServiceError type
+func (e *SecurityError) Error() string {
 	return fmt.Sprintf("%s, %s", e.Instance, e.Message)
 }

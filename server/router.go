@@ -32,9 +32,8 @@ func NewRouter() *gin.Engine {
 		FieldsExclude: []string{logging.BodyFieldName, logging.PayloadFieldName},
 	}))
 	//
-	router.Use(middlewares.ErrorHandler())
 	router.Use(gin.Recovery())
-	// Setup Security Headers
+	router.Use(middlewares.ErrorHandler())
 	router.Use(middlewares.SecurityHandler())
 	router.Use(otelgin.Middleware(config.GetConfig().OTEL.ServiceName))
 

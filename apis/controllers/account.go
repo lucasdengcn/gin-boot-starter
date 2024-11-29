@@ -74,12 +74,14 @@ func (c *AccountController) SignIn(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, ctx))
 		return
 	}
+	userInfo := c.userService.VerifyPassword(ctx, &m)
 	//
-	accessToken, expireTime, err := security.SignAccessToken("1", "web")
+	uid := core.StringFromUint(userInfo.ID)
+	accessToken, expireTime, err := security.SignAccessToken(uid, "web")
 	if err != nil {
 		logging.Error(ctx).Err(err).Msg("signing access token error")
 	}
-	refreshToken, expireTimeRT, err := security.SignRefreshToken("1", "web")
+	refreshToken, expireTimeRT, err := security.SignRefreshToken(uid, "web")
 	if err != nil {
 		logging.Error(ctx).Err(err).Msg("signing refresh token error")
 	}

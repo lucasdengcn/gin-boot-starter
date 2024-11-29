@@ -107,7 +107,7 @@ func NewUnexpectedDetail(err error, c *gin.Context) *ProblemDetails {
 	}
 }
 
-func NewProblemServiceDetail(err ServiceError, c *gin.Context) *ProblemDetails {
+func NewProblemServiceDetail(err *ServiceError, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "ServiceError",
 		Title:    "Service failed to process",
@@ -120,7 +120,7 @@ func NewProblemServiceDetail(err ServiceError, c *gin.Context) *ProblemDetails {
 	}
 }
 
-func NewProblemRepositoryDetail(err RepositoryError, c *gin.Context) *ProblemDetails {
+func NewProblemRepositoryDetail(err *RepositoryError, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "RepositoryError",
 		Title:    "Failed to execute SQL",
@@ -133,7 +133,20 @@ func NewProblemRepositoryDetail(err RepositoryError, c *gin.Context) *ProblemDet
 	}
 }
 
-func NewProblem404Detail(err EntityNotFoundError, c *gin.Context) *ProblemDetails {
+func NewProblemSecurityDetail(err *SecurityError, c *gin.Context) *ProblemDetails {
+	return &ProblemDetails{
+		Type:     "SecurityError",
+		Title:    "Failed on security check",
+		Status:   http.StatusForbidden,
+		Detail:   err.Error(),
+		Instance: c.Request.RequestURI,
+		Extra: map[string]interface{}{
+			"code": err.Code,
+		},
+	}
+}
+
+func NewProblem404Detail(err *EntityNotFoundError, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "NotFoundError",
 		Title:    "Record not found",
@@ -144,4 +157,67 @@ func NewProblem404Detail(err EntityNotFoundError, c *gin.Context) *ProblemDetail
 			"id": err.ID,
 		},
 	}
+}
+
+////////////
+
+func ResponseAsServiceError(ctx *gin.Context, val any) bool {
+	err, ok := val.(*ServiceError)
+	if ok {
+		ctx.JSON(http.StatusInternalServerError, NewProblemServiceDetail(err, ctx))
+		return true
+	}
+	return false
+}
+
+func ResponseAsRepositoryError(ctx *gin.Context, val any) bool {
+	err, ok := val.(*RepositoryError)
+	if ok {
+		ctx.JSON(http.StatusInternalServerError, NewProblemRepositoryDetail(err, ctx))
+		return true
+	}
+	return false
+}
+
+func ResponseAsSecurityError(ctx *gin.Context, val any) bool {
+	err, ok := val.(*SecurityError)
+	if ok {
+		ctx.JSON(http.StatusForbidden, NewProblemSecurityDetail(err, ctx))
+		return true
+	}
+	return false
+}
+
+func ResponseAs404Error(ctx *gin.Context, val any) bool {
+	err, ok := val.(*EntityNotFoundError)
+	if ok {
+		ctx.JSON(http.StatusNotFound, NewProblem404Detail(err, ctx))
+		return true
+	}
+	return false
+}
+
+func ResponseAs500Error(ctx *gin.Context, val any) {
+	err, ok := val.(error)
+	if ok {
+		ctx.JSON(http.StatusInternalServerError, NewUnexpectedDetail(err, ctx))
+	} else {
+		ctx.JSON(http.StatusInternalServerError, NewUnexpectedDetail(fmt.Errorf("Unexpected error: %v", val), ctx))
+	}
+}
+
+func ResponseOnError(ctx *gin.Context, val any) {
+	if ResponseAsSecurityError(ctx, val) {
+		return
+	}
+	if ResponseAsServiceError(ctx, val) {
+		return
+	}
+	if ResponseAsRepositoryError(ctx, val) {
+		return
+	}
+	if ResponseAs404Error(ctx, val) {
+		return
+	}
+	ResponseAs500Error(ctx, val)
 }

@@ -126,3 +126,23 @@ func (s *UserService) DeleteUser(c *gin.Context, id uint) error {
 	// implement the logic to delete a user from database or any other data source
 	return nil
 }
+
+// VerifyPassword sign in user and verify password
+func (s *UserService) VerifyPassword(c *gin.Context, signIn *models.UserSignIn) *models.UserInfo {
+	// implement the logic to sign in user in database or any other data source
+	ue, err := s.userRepository.GetUserByEmail(c, signIn.Email)
+	if err != nil {
+		logging.Error(c).Err(err).Msgf("UserRepository.GetUserByEmail error. email=%v", signIn.Email)
+		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.GetUserByEmail"))
+	}
+	if ue == nil {
+		logging.Error(c).Err(err).Msgf("UserService.VerifyPassword invalid email. email=%v", signIn.Email)
+		panic(core.NewSecurityError(400, "Invalid password or email", "UserService.VerifyPassword"))
+	}
+	ok := security.VerifyPassword(signIn.Password, ue.Password)
+	if !ok {
+		logging.Error(c).Err(err).Msgf("UserService.VerifyPassword invalid password. email=%v", signIn.Email)
+		panic(core.NewSecurityError(400, "Invalid password or email", "UserService.VerifyPassword"))
+	}
+	return s.mapToModel(ue)
+}
