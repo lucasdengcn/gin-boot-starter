@@ -15,11 +15,13 @@ import (
 type AccountController struct {
 	ControllerBase
 	userService *services.UserService
+	aclService  *services.AclService
 }
 
-func NewAccountController(userService *services.UserService) *AccountController {
+func NewAccountController(userService *services.UserService, aclService *services.AclService) *AccountController {
 	return &AccountController{
 		userService: userService,
+		aclService:  aclService,
 	}
 }
 
@@ -48,8 +50,7 @@ func (c *AccountController) SignUp(ctx *gin.Context) {
 	}()
 	//
 	user := c.userService.CreateUser(ctx, &m)
-	// other service
-	// other service
+	c.aclService.SetForNewUser(ctx, user.ID)
 	//
 	ctx.JSON(http.StatusCreated, user)
 }

@@ -23,10 +23,10 @@ func NewUserRepository(dbCon *sqlx.DB) *UserRepository {
 // CreateUser with userEntity
 func (u *UserRepository) CreateUser(c *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
 	// implement the logic to create a new user in the database or storage system.
-	insertSQL := "insert into users(name, birthday, gender, photo_url, email) values($1, $2, $3, $4, $5) RETURNING id"
+	insertSQL := "insert into users(name, birthday, gender, photo_url, email, hashed_password, roles) values($1, $2, $3, $4, $5, $6, %7) RETURNING id"
 	stmt := u.prepareStatement(c, insertSQL)
 	var id uint
-	err := stmt.Get(&id, user.Name, user.BirthDay, user.Gender, user.PhotoURL, user.Email)
+	err := stmt.Get(&id, user.Name, user.BirthDay, user.Gender, user.PhotoURL, user.Email, user.Password, user.Roles)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (u *UserRepository) CreateUser(c *gin.Context, user *entity.UserEntity) (*e
 // CreateUser2 with userEntity
 func (u *UserRepository) CreateUser2(c *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
 	// implement the logic to create a new user in the database or storage system.
-	insertSQL := "insert into users(name, birthday, gender, photo_url, email) values(:name, :birthday, :gender, :photo_url, :email) RETURNING id"
+	insertSQL := "insert into users(name, birthday, gender, photo_url, email, hashed_password, roles) values(:name, :birthday, :gender, :photo_url, :email, :hashed_password, :roles) RETURNING id"
 	stmt := u.prepareNamed(c, insertSQL)
 	var id uint
 	err := stmt.Get(&id, user)

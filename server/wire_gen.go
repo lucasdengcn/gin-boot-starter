@@ -19,8 +19,15 @@ import (
 func InitializeUserService() *services.UserService {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
-	servicesUserService := services.NewUserService(userRepository)
-	return servicesUserService
+	userService := services.NewUserService(userRepository)
+	return userService
+}
+
+func InitializeAclService() *services.AclService {
+	sqlxDB := db.GetDBCon()
+	aclRepository := repository.NewAclRepository(sqlxDB)
+	aclService := services.NewAclService(aclRepository)
+	return aclService
 }
 
 // wire_injector.go:
@@ -28,9 +35,9 @@ func InitializeUserService() *services.UserService {
 // reuseable
 var dbSet = wire.NewSet(db.GetDBCon)
 
-// reuseable
-var userService *services.UserService
+var aclServiceSet = wire.NewSet(dbSet, repository.NewAclRepository, services.NewAclService)
 
+// reuseable
 var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
 
 // InitializeUserController injector
@@ -39,5 +46,5 @@ func InitializeUserController() *controllers.UserController {
 }
 
 func InitializeAccountController() *controllers.AccountController {
-	return controllers.NewAccountController(InitializeUserService())
+	return controllers.NewAccountController(InitializeUserService(), InitializeAclService())
 }

@@ -2,11 +2,7 @@
 
 ## Overview
 
-for fast starting a application on top of Gin framework.
-
-## How to run
-
-clone this repo, and rename directory to gin001.
+for fast starting a microservice application on top of Gin framework.
 
 ## Project Structures
 
@@ -73,6 +69,8 @@ in General, migration files should be put in a dedicated repo, and run with a de
 [pprof](https://github.com/gin-contrib/pprof)
 
 [JWT](<https://github.com/golang-jwt/jwt> <https://github.com/MicahParks/keyfunc>)
+
+[ACL casbin] (<https://casbin.org/>)
 
 ### Panic or return
 

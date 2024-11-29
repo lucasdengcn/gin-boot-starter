@@ -9,6 +9,7 @@ type UserSignUp struct {
 	Gender   string     `json:"gender" binding:"required,gender" example:"male, female"`
 	PhotoURL string     `json:"photo_url,omitempty" binding:"required,http_url"`
 	Email    string     `json:"email" binding:"required,email"`
+	Password string     `json:"password" binding:"required"`
 }
 
 // UserInfo response output model

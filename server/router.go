@@ -28,7 +28,6 @@ func NewRouter() *gin.Engine {
 	// router.Use(gin.Logger())
 	// Add logger as a middleware
 	router.Use(logging.LoggerWithOptions(&logging.Options{
-		Name:          "App",
 		Logger:        &log.Logger,
 		FieldsExclude: []string{logging.BodyFieldName, logging.PayloadFieldName},
 	}))

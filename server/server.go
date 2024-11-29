@@ -67,6 +67,12 @@ func Start() {
 		log.Fatal().Msg("DB Connection Failed.")
 		return
 	}
+	acl := InitializeAclService()
+	err = acl.LoadPolicy()
+	if err != nil {
+		log.Fatal().Msg("Load ACL rules failed.")
+		return
+	}
 	//
 	r := NewRouter()
 	//

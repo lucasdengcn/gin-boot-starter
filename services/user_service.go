@@ -4,6 +4,7 @@ import (
 	"gin-boot-starter/apis/models"
 	"gin-boot-starter/core"
 	"gin-boot-starter/core/logging"
+	"gin-boot-starter/core/security"
 	"gin-boot-starter/persistence/entity"
 	"gin-boot-starter/persistence/repository"
 
@@ -66,14 +67,20 @@ func (s *UserService) GetUser(c *gin.Context, id uint) *models.UserInfo {
 // CreateUser with UserEntity and return UserInfo
 func (s *UserService) CreateUser(c *gin.Context, signUp *models.UserSignUp) *models.UserInfo {
 	// implement the logic to create a new user in database or any other data source
+	hashPassword, err := security.HashPassword(signUp.Password)
+	if err != nil {
+		logging.Error(c).Err(err).Msgf("UserService.CreateUser error. data: %v", signUp)
+		panic(core.NewServiceError(500, err.Error(), "UserService.CreateUser"))
+	}
 	ue := entity.UserEntity{
 		Name:     signUp.Name,
 		PhotoURL: signUp.PhotoURL,
 		BirthDay: signUp.BirthDay,
 		Gender:   signUp.Gender,
 		Email:    signUp.Email,
+		Roles:    security.RoleUser,
+		Password: hashPassword,
 	}
-	// ueCreated, err := s.userRepository.CreateUser(&ue)
 	ueCreated, err := s.userRepository.CreateUser2(c, &ue)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.CreateUser error. data: %v", signUp)

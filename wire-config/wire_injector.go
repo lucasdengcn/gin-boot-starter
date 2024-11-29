@@ -12,6 +12,8 @@ import (
 // reuseable
 var dbSet = wire.NewSet(db.GetDBCon)
 
+var aclServiceSet = wire.NewSet(dbSet, repository.NewAclRepository, services.NewAclService)
+
 // reuseable
 var userServiceSet = wire.NewSet(dbSet, repository.NewUserRepository, services.NewUserService)
 
@@ -21,10 +23,15 @@ func InitializeUserController() *controllers.UserController {
 }
 
 func InitializeAccountController() *controllers.AccountController {
-	return controllers.NewAccountController(InitializeUserService())
+	return controllers.NewAccountController(InitializeUserService(), InitializeAclService())
 }
 
 func InitializeUserService() *services.UserService {
 	wire.Build(userServiceSet)
 	return &services.UserService{}
+}
+
+func InitializeAclService() *services.AclService {
+	wire.Build(aclServiceSet)
+	return &services.AclService{}
 }

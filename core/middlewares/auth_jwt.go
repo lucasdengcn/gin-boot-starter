@@ -20,9 +20,12 @@ func AuthJwtHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Authorization Required"), c))
-			c.Abort()
-			return
+			tokenString, err := c.Cookie("X-Authorization")
+			if tokenString == "" || err != nil {
+				c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Authorization Required"), c))
+				c.Abort()
+				return
+			}
 		}
 		if !strings.HasPrefix(tokenString, bearer) {
 			c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Authorization Header Invalid"), c))
