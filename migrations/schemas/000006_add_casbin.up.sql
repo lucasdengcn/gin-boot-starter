@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS casbin_rule (
     v5 VARCHAR(100)
 );
 
-ALTER TABLE users ADD COLUMN hashed_password text;
-ALTER TABLE users ADD COLUMN roles text;
+ALTER TABLE users ADD COLUMN hashed_password text DEFAULT "";
+ALTER TABLE users ADD COLUMN roles text DEFAULT "";
 
 COMMIT;

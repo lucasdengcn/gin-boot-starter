@@ -3,7 +3,6 @@ package controllers
 import (
 	"gin-boot-starter/apis/models"
 	"gin-boot-starter/core"
-	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/infra/db"
 	"gin-boot-starter/services"
@@ -55,13 +54,19 @@ func (uc *UserController) GetCurrentUser(ctx *gin.Context) {
 // @Failure      500  {object}  error
 // @Router /users/v1/:id [GET]
 func (uc *UserController) GetUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := core.UintFromString(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, core.NewProblemValidationDetail("id", err.Error(), c))
 		return
 	}
-	logging.Debug(c).Msgf("GetUser with id:%v", id)
-	user := uc.userService.GetUser(c, uint(id))
+	// check current user's ACL
+	sessionUser := security.CurrentUser(c)
+	ok := uc.aclService.HasPolicy(c, sessionUser.GetID(), "user", "read")
+	if !ok {
+		panic(core.NewSecurityError(403, "Permission denied", "UserController.GetUser"))
+	}
+	// query on user info
+	user := uc.userService.GetUser(c, id)
 	c.JSON(http.StatusOK, user)
 }
 
