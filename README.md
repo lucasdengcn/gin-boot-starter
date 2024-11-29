@@ -72,11 +72,17 @@ in General, migration files should be put in a dedicated repo, and run with a de
 
 [ACL casbin] (<https://casbin.org/>)
 
+## Practices
+
 ### Panic or return
 
 Repository SHOULD return error, SHOULD NOT Panic.
-Service SHOULD Panic.
+Service MUST Panic if error and NEED to stop execution
 Global Recovery/Defer function SHOULD handle error and response
+
+### Column Default value
+
+Always set DEFAULT value on database table column, so that can avoid can't convert from NULL to yyy error
 
 ## Reference
 
