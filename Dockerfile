@@ -44,6 +44,7 @@ COPY --from=builder /build/gin-boot-starter/gin-runner .
 COPY --from=builder /build/gin-boot-starter/entrypoint.sh .
 COPY --from=builder /build/gin-boot-starter/config/*.yaml ./config/
 COPY --from=builder /build/gin-boot-starter/config/*.pem ./config/
+COPY --from=builder /build/gin-boot-starter/config/*.conf ./config/
 COPY --from=builder /build/gin-boot-starter/migrations ./migrations/
 
 EXPOSE 8080
