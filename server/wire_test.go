@@ -9,7 +9,7 @@ import (
 )
 
 func before() {
-	var basePath = config.GetBasePath() + "/config"
+	var basePath = config.GetBasePath()
 	config.LoadConf(basePath, "dev")
 }
 

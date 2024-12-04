@@ -77,8 +77,10 @@ in General, migration files should be put in a dedicated repo, and run with a de
 ### Panic or return
 
 Repository SHOULD return error, SHOULD NOT Panic.
-Service MUST Panic if error and NEED to stop execution
-Global Recovery/Defer function SHOULD handle error and response
+
+Service MUST Panic if error and NEED to stop execution.
+
+Global Recovery/Defer function SHOULD handle error and response.
 
 ### Column Default value
 

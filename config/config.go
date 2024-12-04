@@ -25,6 +25,7 @@ type Application struct {
 	Description string
 	Profile     string
 	CfgPath     string
+	WorkingPath string
 }
 
 type DataSource struct {
@@ -96,14 +97,14 @@ func intValue(v *viper.Viper, cfgKey, envKey string, defaultValue int) int {
 
 // LoadConf is an exported method that takes the environment starts the viper
 // (external lib) and returns the configuration struct.
-func LoadConf(cfgPath, env string) error {
+func LoadConf(workingPath, env string) error {
 	var err error
 	var config *viper.Viper
 	//
 	config = viper.New()
 	config.SetConfigType("yaml")
 	config.SetConfigName("application")
-	config.AddConfigPath(cfgPath)
+	config.AddConfigPath(workingPath + "/config")
 	err = config.ReadInConfig()
 	if err != nil {
 		log.Println("error on parsing default configuration file", err)
@@ -112,8 +113,8 @@ func LoadConf(cfgPath, env string) error {
 
 	envConfig := viper.New()
 	envConfig.SetConfigType("yaml")
-	envConfig.AddConfigPath(cfgPath)
-	envConfig.SetConfigName("application." + env)
+	envConfig.AddConfigPath(workingPath + "/config")
+	envConfig.SetConfigName("application-" + env)
 	err = envConfig.ReadInConfig()
 	if err != nil {
 		log.Println("error on parsing env configuration file")
@@ -126,7 +127,8 @@ func LoadConf(cfgPath, env string) error {
 			Name:        value(config, "app.name", "APP_NAME", "Gin demo"),
 			Description: value(config, "app.description", "APP_DESCRIPTION", ""),
 			Profile:     value(config, "app.profile", "APP_PROFILE", "dev"),
-			CfgPath:     cfgPath,
+			CfgPath:     workingPath + "/config",
+			WorkingPath: workingPath,
 		},
 		DataSource: &DataSource{
 			URL:     value(config, "datasource.url", "APP_DATASOURCE_URL", ""),

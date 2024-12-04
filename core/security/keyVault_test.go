@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	config.LoadConf(config.GetBasePath()+"/config", "test")
+	config.LoadConf(config.GetBasePath(), "test")
 }
 
 func TestGetCfgPublicKey(t *testing.T) {

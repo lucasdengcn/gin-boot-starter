@@ -33,20 +33,20 @@ func getEnvOrFlagValue(flagValue, envVarName string) string {
 // @schemes http
 func main() {
 	//
-	flagEnv := flag.String("e", "dev", "")
-	flagCfg := flag.String("cfg", "", "")
+	flagEnv := flag.String("e", "dev", "active profile, eg. dev, sit, uat, staging, prod")
+	flagCfg := flag.String("w", "", "")
 	flag.Usage = func() {
-		fmt.Println("Usage: server -cfg {path} -e {mode}")
+		fmt.Println("Usage: server -w {path} -e {mode}")
 		os.Exit(1)
 	}
 	flag.Parse()
 	//
 	var envName = getEnvOrFlagValue(*flagEnv, "APP_ENV")
-	var cfgPath = getEnvOrFlagValue(*flagCfg, "APP_CFG")
+	var basePath = getEnvOrFlagValue(*flagCfg, "APP_BASE")
 	//
-	fmt.Printf("running in %v, env: %v\n", cfgPath, envName)
+	fmt.Printf("running in %v, env: %v\n", basePath, envName)
 	// load configuration
-	config.LoadConf(cfgPath, envName)
+	config.LoadConf(basePath, envName)
 	// build up db schema
 	migrations.Build()
 	//
