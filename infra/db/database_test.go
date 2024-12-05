@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

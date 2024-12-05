@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/migrations"
 	"gin-boot-starter/server"
 	"os"

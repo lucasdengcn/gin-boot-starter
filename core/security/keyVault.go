@@ -5,9 +5,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/logging"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -32,7 +33,7 @@ func GetPublicKey(pemFile string) (*rsa.PublicKey, error) {
 func GetCfgPublicKey() (*rsa.PublicKey, error) {
 	cfg := config.GetConfig().Security.JWT
 	if strings.HasSuffix(cfg.PublicKey, ".pem") {
-		path := config.GetConfig().Application.CfgPath + "/" + cfg.PublicKey
+		path := filepath.Join(config.GetConfig().Application.WorkingPath, "secrets", cfg.PublicKey)
 		return GetPublicKey(path)
 	}
 	// TO DO: Read from key vault or jwk url
@@ -84,7 +85,7 @@ func ParsePrivateKey(data []byte) (*rsa.PrivateKey, error) {
 func GetCfgPrivateKey() (*rsa.PrivateKey, error) {
 	jwt := config.GetConfig().Security.JWT
 	if strings.HasSuffix(jwt.PrivateKey, ".pem") {
-		path := config.GetConfig().Application.CfgPath + "/" + jwt.PrivateKey
+		path := filepath.Join(config.GetConfig().Application.WorkingPath, "secrets", jwt.PrivateKey)
 		return GetPrivateKey(path)
 	}
 	// TO DO: Read from key vault

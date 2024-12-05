@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/otel"
 	"gin-boot-starter/core/validators"
 	"gin-boot-starter/infra/db"

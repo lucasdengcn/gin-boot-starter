@@ -1,7 +1,7 @@
 package db
 
 import (
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/logging"
 	"sync"
 

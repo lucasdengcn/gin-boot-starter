@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"gin-boot-starter/config"
 	"gin-boot-starter/core"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/logging"
+	"path/filepath"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ func NewAclRepository(dbCon *sqlx.DB) *AclRepository {
 		}
 		a := sqlxadapter.NewAdapterFromOptions(opts)
 		//
-		path := config.GetConfig().Application.CfgPath + "/rbac_model.conf"
+		path := filepath.Join(config.GetConfig().Application.WorkingPath, "config", "rbac_model.conf")
 		e, err := casbin.NewEnforcer(path, a)
 		if err != nil {
 			logging.Fatal(nil).Err(err).Msg("Init casbin enforcer Error.")

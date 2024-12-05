@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"os"
 	"testing"
 
@@ -10,7 +10,7 @@ import (
 
 func before() {
 	var basePath = config.GetBasePath()
-	config.LoadConf(basePath, "dev")
+	config.LoadConf(basePath, "test")
 }
 
 func after() {

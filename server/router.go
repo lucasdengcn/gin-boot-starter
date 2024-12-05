@@ -2,7 +2,7 @@ package server
 
 import (
 	"gin-boot-starter/apis/controllers"
-	"gin-boot-starter/config"
+	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/middlewares"
 
