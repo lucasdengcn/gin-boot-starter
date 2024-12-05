@@ -1,4 +1,4 @@
-package core
+package exception
 
 import (
 	"fmt"
@@ -115,7 +115,7 @@ func NewProblemServiceDetail(err *ServiceError, c *gin.Context) *ProblemDetails 
 		Detail:   err.Error(),
 		Instance: c.Request.RequestURI,
 		Extra: map[string]interface{}{
-			"code": err.Code,
+			"errno": err.Errno,
 		},
 	}
 }
@@ -128,12 +128,12 @@ func NewProblemRepositoryDetail(err *RepositoryError, c *gin.Context) *ProblemDe
 		Detail:   err.Error(),
 		Instance: c.Request.RequestURI,
 		Extra: map[string]interface{}{
-			"code": err.Code,
+			"errno": err.Errno,
 		},
 	}
 }
 
-func NewProblemSecurityDetail(err *SecurityError, c *gin.Context) *ProblemDetails {
+func NewProblemSecurityDetail(err *ACLError, c *gin.Context) *ProblemDetails {
 	return &ProblemDetails{
 		Type:     "SecurityError",
 		Title:    "Failed on security check",
@@ -141,7 +141,7 @@ func NewProblemSecurityDetail(err *SecurityError, c *gin.Context) *ProblemDetail
 		Detail:   err.Error(),
 		Instance: c.Request.RequestURI,
 		Extra: map[string]interface{}{
-			"code": err.Code,
+			"errno": err.Errno,
 		},
 	}
 }
@@ -180,7 +180,7 @@ func ResponseAsRepositoryError(ctx *gin.Context, val any) bool {
 }
 
 func ResponseAsSecurityError(ctx *gin.Context, val any) bool {
-	err, ok := val.(*SecurityError)
+	err, ok := val.(*ACLError)
 	if ok {
 		ctx.JSON(http.StatusForbidden, NewProblemSecurityDetail(err, ctx))
 		return true

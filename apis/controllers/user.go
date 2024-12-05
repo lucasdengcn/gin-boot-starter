@@ -3,6 +3,7 @@ package controllers
 import (
 	"gin-boot-starter/apis/models"
 	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/infra/db"
 	"gin-boot-starter/services"
@@ -56,15 +57,12 @@ func (uc *UserController) GetCurrentUser(ctx *gin.Context) {
 func (uc *UserController) GetUser(c *gin.Context) {
 	id, err := core.UintFromString(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, core.NewProblemValidationDetail("id", err.Error(), c))
+		c.JSON(http.StatusBadRequest, exception.NewProblemValidationDetail("id", err.Error(), c))
 		return
 	}
 	// check current user's ACL
 	sessionUser := security.CurrentUser(c)
-	ok := uc.aclService.HasPolicy(c, sessionUser.GetID(), "user", "read")
-	if !ok {
-		panic(core.NewSecurityError(403, "Permission denied", "UserController.GetUser"))
-	}
+	uc.aclService.HasPolicy(c, sessionUser.GetID(), "user", "read")
 	// query on user info
 	user := uc.userService.GetUser(c, id)
 	c.JSON(http.StatusOK, user)
@@ -101,12 +99,12 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, core.NewProblemValidationDetail("id", err.Error(), c))
+		c.JSON(http.StatusBadRequest, exception.NewProblemValidationDetail("id", err.Error(), c))
 		return
 	}
 	var m models.UserInfoUpdate
 	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, c))
+		c.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, c))
 		return
 	}
 	// given the request would modify data, then it should be in tx scope

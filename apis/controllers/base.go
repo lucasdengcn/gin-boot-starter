@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/infra/db"
 
@@ -15,7 +15,7 @@ func (c *ControllerBase) deferTxCallback(ctx *gin.Context, val any) {
 	logging.Debug(ctx).Msgf("In recover call. Err is: %v", val)
 	if val != nil {
 		db.RollbackTx(ctx)
-		core.ResponseOnError(ctx, val)
+		exception.ResponseOnError(ctx, val)
 	} else {
 		db.CommitTx(ctx)
 	}

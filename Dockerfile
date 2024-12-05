@@ -9,7 +9,10 @@ WORKDIR /build/gin-boot-starter
 
 ENV GIN_MODE=release
 
-COPY go.mod go.sum main.go entrypoint.sh ./
+COPY go.mod go.sum entrypoint.sh ./
+RUN dos2unix entrypoint.sh
+RUN go mod download
+
 #
 COPY apis ./apis
 COPY config ./config 
@@ -23,9 +26,9 @@ COPY persistence ./persistence
 COPY server ./server
 COPY services ./services
 COPY wire-config ./wire-config
+COPY secrets ./secrets
+COPY main.go ./
 
-RUN dos2unix entrypoint.sh
-RUN go mod download
 RUN go build -o gin-runner .
 
 FROM alpine:latest
@@ -34,16 +37,17 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /app
 RUN mkdir -p /app/config
+RUN mkdir -p /app/secrets
 
 ENV APP_ENV dev
-ENV APP_CFG /app/config
+ENV APP_BASE /app
 
 WORKDIR /app
 
 COPY --from=builder /build/gin-boot-starter/gin-runner .
 COPY --from=builder /build/gin-boot-starter/entrypoint.sh .
 COPY --from=builder /build/gin-boot-starter/config/*.yaml ./config/
-COPY --from=builder /build/gin-boot-starter/config/*.pem ./config/
+COPY --from=builder /build/gin-boot-starter/secrets/*.pem ./secrets/
 COPY --from=builder /build/gin-boot-starter/config/*.conf ./config/
 COPY --from=builder /build/gin-boot-starter/migrations ./migrations/
 

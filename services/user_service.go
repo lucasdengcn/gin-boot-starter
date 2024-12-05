@@ -2,7 +2,7 @@ package services
 
 import (
 	"gin-boot-starter/apis/models"
-	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/persistence/entity"
@@ -47,7 +47,7 @@ func (s *UserService) GetUsers(c *gin.Context) []*models.UserInfo {
 	list, err := s.userRepository.FindUsers(c)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.FindUsers error.")
-		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.FindUsers"))
+		panic(exception.NewRepositoryError(c, "USER_GETS_500", err.Error()))
 	}
 	var result []*models.UserInfo
 	for _, ue := range list {
@@ -63,10 +63,10 @@ func (s *UserService) GetUser(c *gin.Context, id uint) *models.UserInfo {
 	ue, err := s.userRepository.GetUser(c, id)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.GetUser error. id=%v", id)
-		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.GetUser"))
+		panic(exception.NewRepositoryError(c, "USER_GET_500", err.Error()))
 	}
 	if nil == ue {
-		panic(core.NewEntityNotFoundError(id, "User not found", "UserRepository.GetUser"))
+		panic(exception.NewEntityNotFoundError(c, id, "User not found"))
 	}
 	return s.mapToModel(ue)
 }
@@ -77,7 +77,7 @@ func (s *UserService) CreateUser(c *gin.Context, signUp *models.UserSignUp) *mod
 	hashPassword, err := security.HashPassword(signUp.Password)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserService.CreateUser error. data: %v", signUp)
-		panic(core.NewServiceError(500, err.Error(), "UserService.CreateUser"))
+		panic(exception.NewServiceError(c, "USER_PASSWORD_HASH_500", err.Error()))
 	}
 	ue := entity.UserEntity{
 		Name:     signUp.Name,
@@ -91,7 +91,7 @@ func (s *UserService) CreateUser(c *gin.Context, signUp *models.UserSignUp) *mod
 	ueCreated, err := s.userRepository.CreateUser2(c, &ue)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.CreateUser error. data: %v", signUp)
-		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.CreateUser"))
+		panic(exception.NewRepositoryError(c, "USER_CREATE_500", err.Error()))
 	}
 	return s.mapToModel(ueCreated)
 }
@@ -110,10 +110,10 @@ func (s *UserService) UpdateUser(c *gin.Context, id uint, userInfoUpdate *models
 	updated, err := s.userRepository.UpdateUser(c, &ue)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.UpdateUser error. data: %v", userInfoUpdate)
-		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.UpdateUser"))
+		panic(exception.NewRepositoryError(c, "USER_UPDATE_500", err.Error()))
 	}
 	if !updated {
-		panic(core.NewEntityNotFoundError(id, "User not found.", "UserRepository.UpdateUser"))
+		panic(exception.NewEntityNotFoundError(c, id, "User not found."))
 	}
 	// for testing transaction rollback, if panic here, UpdateUser will rollback.
 	// panic(core.NewServiceError(400, "Something is wrong"))
@@ -133,16 +133,16 @@ func (s *UserService) VerifyPassword(c *gin.Context, signIn *models.UserSignIn) 
 	ue, err := s.userRepository.GetUserByEmail(c, signIn.Email)
 	if err != nil {
 		logging.Error(c).Err(err).Msgf("UserRepository.GetUserByEmail error. email=%v", signIn.Email)
-		panic(core.NewRepositoryError(500, err.Error(), "UserRepository.GetUserByEmail"))
+		panic(exception.NewRepositoryError(c, "USER_GET_BY_EMAIL_500", err.Error()))
 	}
 	if ue == nil {
 		logging.Error(c).Err(err).Msgf("UserService.VerifyPassword invalid email. email=%v", signIn.Email)
-		panic(core.NewSecurityError(400, "Invalid password or email", "UserService.VerifyPassword"))
+		panic(exception.NewAuthError(c, "USER_ACCOUNT_404", "Invalid password or email"))
 	}
 	ok := security.VerifyPassword(signIn.Password, ue.Password)
 	if !ok {
 		logging.Error(c).Err(err).Msgf("UserService.VerifyPassword invalid password. email=%v", signIn.Email)
-		panic(core.NewSecurityError(400, "Invalid password or email", "UserService.VerifyPassword"))
+		panic(exception.NewAuthError(c, "USER_ACCOUNT_400", "Invalid password or email"))
 	}
 	return s.mapToModel(ue)
 }

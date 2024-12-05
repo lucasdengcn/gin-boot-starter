@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ func ErrorHandler() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				// Log the error
 				logging.Error(c).Msgf("Recovered from panic: %T, %v", err, err)
-				core.ResponseOnError(c, err)
+				exception.ResponseOnError(c, err)
 			}
 		}()
 		c.Next()

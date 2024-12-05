@@ -3,6 +3,7 @@ package controllers
 import (
 	"gin-boot-starter/apis/models"
 	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/infra/db"
@@ -40,7 +41,7 @@ func NewAccountController(userService *services.UserService, aclService *service
 func (c *AccountController) SignUp(ctx *gin.Context) {
 	var m models.UserSignUp
 	if err := ctx.ShouldBind(&m); err != nil {
-		ctx.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, ctx))
+		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return
 	}
 	db.BeginTx(ctx)
@@ -71,7 +72,7 @@ func (c *AccountController) SignIn(ctx *gin.Context) {
 	//
 	var m models.UserSignIn
 	if err := ctx.ShouldBind(&m); err != nil {
-		ctx.JSON(http.StatusBadRequest, core.NewProblemBindingDetail(err, ctx))
+		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return
 	}
 	userInfo := c.userService.VerifyPassword(ctx, &m)

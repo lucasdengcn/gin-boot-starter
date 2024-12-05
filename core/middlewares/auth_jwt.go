@@ -2,14 +2,14 @@ package middlewares
 
 import (
 	"fmt"
-	"gin-boot-starter/core"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 var (
@@ -22,13 +22,13 @@ func AuthJwtHandler() gin.HandlerFunc {
 		if tokenString == "" {
 			tokenString, err := c.Cookie("X-Authorization")
 			if tokenString == "" || err != nil {
-				c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Authorization Required"), c))
+				c.JSON(http.StatusUnauthorized, exception.NewProblemAuthDetail(fmt.Errorf("Authorization Required"), c))
 				c.Abort()
 				return
 			}
 		}
 		if !strings.HasPrefix(tokenString, bearer) {
-			c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Authorization Header Invalid"), c))
+			c.JSON(http.StatusUnauthorized, exception.NewProblemAuthDetail(fmt.Errorf("Authorization Header Invalid"), c))
 			c.Abort()
 			return
 		}
@@ -38,7 +38,7 @@ func AuthJwtHandler() gin.HandlerFunc {
 		token, err := jwt.ParseWithClaims(tokenString, &security.AuthClaims{}, security.PublicJwtKeyfuncCtx(c))
 		if err != nil || !token.Valid {
 			logging.Error(c).Err(err).Msgf("Token Invalid:%s", tokenString)
-			c.JSON(http.StatusUnauthorized, core.NewProblemAuthDetail(fmt.Errorf("Token Invalid"), c))
+			c.JSON(http.StatusUnauthorized, exception.NewProblemAuthDetail(fmt.Errorf("Token Invalid"), c))
 			c.Abort()
 			return
 		}

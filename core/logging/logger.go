@@ -2,6 +2,7 @@ package logging
 
 import (
 	"bytes"
+	"gin-boot-starter/core/correlation"
 	"io"
 	"os"
 	"strings"
@@ -223,21 +224,24 @@ func buildContextLogger(ctx *gin.Context, z *zerolog.Logger) zerolog.Logger {
 	traceID := ""
 	spanID := ""
 	correlationID := ""
+	//
+	coCtx := &correlation.CorrelationCtx{}
+	//
 	if traceparent != "" {
 		parts := strings.Split(traceparent, "-")
 		if len(parts) == 4 {
 			traceID = parts[1]
 			spanID = parts[2]
-			ctx.Set(TraceIdFieldName, traceID)
-			ctx.Set(SpanIdFieldName, spanID)
+			coCtx.TraceId = traceID
+			coCtx.SpanId = spanID
 		}
 	}
-
+	//
 	if traceID == "" || spanID == "" {
 		correlationID = xid.New().String()
-		ctx.Set(CorrelationIdFieldName, correlationID)
+		coCtx.Id = correlationID
 	}
-
+	//
 	l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 		zc := c
 		if correlationID != "" {
@@ -254,6 +258,7 @@ func buildContextLogger(ctx *gin.Context, z *zerolog.Logger) zerolog.Logger {
 	if correlationID != "" {
 		ctx.Header("X-Correlation-ID", correlationID)
 	}
+	ctx.Set(correlation.CorrelationCtxKey, coCtx)
 	ctx.Set(loggerKey, l)
 	return l
 }
