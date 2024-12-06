@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"gin-boot-starter/core/config"
-	"log"
+	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,6 +16,11 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+
+	stdoutlog "go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
+	stdoutmetric "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
+	stdouttrace "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+
 	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
@@ -26,10 +33,13 @@ var shutdownFuncs []func(context.Context) error
 
 // Initialize a gRPC connection to be used by both the tracer and meter
 // providers.
-func initConn() *grpc.ClientConn {
+func initConn() (*grpc.ClientConn, error) {
 	// It connects the OpenTelemetry Collector through local gRPC connection.
 	//
 	otelCfg := config.GetConfig().OTEL
+	if otelCfg.Stdout {
+		return nil, nil
+	}
 	//
 	// secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	// if otelCfg.Insecure == "true" {
@@ -42,25 +52,36 @@ func initConn() *grpc.ClientConn {
 	option := grpc.WithTransportCredentials(credentials)
 	conn, err := grpc.NewClient(otelCfg.OTLPEndpoint, option)
 	if err != nil {
-		log.Fatalf("failed to create gRPC connection to collector: %v", err)
+		log.Error().Err(err).Msgf("failed to create gRPC connection to collector")
+		return nil, err
 	}
-	return conn
+	return conn, nil
 }
 
-func initTracerProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) func(context.Context) error {
+func initTracerProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (*sdktrace.TracerProvider, error) {
 	// Set up a trace exporter
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
-	if err != nil {
-		log.Fatalf("failed to create trace exporter: %v", err)
+	stdoutEnabled := config.GetConfig().OTEL.Stdout
+	var exporterOption sdktrace.TracerProviderOption
+	if stdoutEnabled {
+		exporter, err := stdouttrace.New()
+		if err != nil {
+			return nil, err
+		}
+		exporterOption = sdktrace.WithBatcher(exporter)
+	} else {
+		exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+		if err != nil {
+			log.Error().Err(err).Msgf("failed to create trace exporter")
+			return nil, err
+		}
+		exporterOption = sdktrace.WithBatcher(exporter)
 	}
-
 	// Register the trace exporter with a TracerProvider, using a batch
 	// span processor to aggregate spans before export.
-	bsp := sdktrace.NewBatchSpanProcessor(traceExporter)
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithResource(res),
-		sdktrace.WithSpanProcessor(bsp),
+		exporterOption,
 	)
 	otel.SetTracerProvider(tracerProvider)
 
@@ -68,53 +89,75 @@ func initTracerProvider(ctx context.Context, res *resource.Resource, conn *grpc.
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// Shutdown will flush any remaining spans and shut down the exporter.
-	return tracerProvider.Shutdown
+	return tracerProvider, nil
 }
 
 // Initializes an OTLP exporter, and configures the corresponding meter provider.
-func initMeterProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) func(context.Context) error {
-	metricExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
-	if err != nil {
-		log.Fatalf("failed to create metrics exporter: %v", err)
+func initMeterProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (*sdkmetric.MeterProvider, error) {
+	stdoutEnabled := config.GetConfig().OTEL.Stdout
+	var reader *sdkmetric.PeriodicReader
+	if stdoutEnabled {
+		// different type of exporter
+		exporter, err := stdoutmetric.New()
+		if err != nil {
+			return nil, err
+		}
+		reader = sdkmetric.NewPeriodicReader(exporter, sdkmetric.WithInterval(10*time.Second))
+	} else {
+		exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
+		if err != nil {
+			log.Error().Err(err).Msgf("failed to create metrics exporter")
+			return nil, err
+		}
+		reader = sdkmetric.NewPeriodicReader(exporter, sdkmetric.WithInterval(10*time.Second))
 	}
-
+	//
 	meterProvider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter)),
+		sdkmetric.WithReader(reader),
 		sdkmetric.WithResource(res),
 	)
 	otel.SetMeterProvider(meterProvider)
 
-	return meterProvider.Shutdown
+	return meterProvider, nil
 }
 
 // Initializes an OTLP exporter, and configures the corresponding logging provider.
-func initLogProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) func(context.Context) error {
-	logExporter, err := otlploggrpc.New(ctx, otlploggrpc.WithGRPCConn(conn))
-	if err != nil {
-		log.Fatalf("failed to create log exporter: %v", err)
+func initLogProvider(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (*sdklog.LoggerProvider, error) {
+	stdoutEnabled := config.GetConfig().OTEL.Stdout
+	var logProcessor *sdklog.BatchProcessor
+	if stdoutEnabled {
+		logExporter, err := stdoutlog.New()
+		if err != nil {
+			return nil, err
+		}
+		logProcessor = sdklog.NewBatchProcessor(logExporter, sdklog.WithExportInterval(10*time.Second))
+	} else {
+		logExporter, err := otlploggrpc.New(ctx, otlploggrpc.WithGRPCConn(conn))
+		if err != nil {
+			log.Error().Err(err).Msgf("failed to create log exporter")
+			return nil, err
+		}
+		logProcessor = sdklog.NewBatchProcessor(logExporter, sdklog.WithExportInterval(10*time.Second))
 	}
-
+	//
 	loggerProvider := sdklog.NewLoggerProvider(
-		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExporter)),
+		sdklog.WithProcessor(logProcessor),
 		sdklog.WithResource(res),
 	)
-
+	//
 	global.SetLoggerProvider(loggerProvider)
-
-	return loggerProvider.Shutdown
+	//
+	return loggerProvider, nil
 }
 
 func InitProviders(ctx context.Context) {
 	//
 	otelCfg := config.GetConfig().OTEL
-	if otelCfg.OTLPEndpoint == "" {
+	//
+	conn, err := initConn()
+	if err != nil {
 		return
 	}
-	//
-	conn := initConn()
-
-	// ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	// defer cancel()
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
@@ -124,22 +167,31 @@ func InitProviders(ctx context.Context) {
 		),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msgf("Resource create error")
 	}
 
 	if otelCfg.Tracer {
-		shutdownTracerProvider := initTracerProvider(ctx, res, conn)
-		shutdownFuncs = append(shutdownFuncs, shutdownTracerProvider)
+		tracerProvider, err := initTracerProvider(ctx, res, conn)
+		if err != nil {
+			return
+		}
+		shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
 	}
 	//
 	if otelCfg.Metric {
-		shutdownMeterProvider := initMeterProvider(ctx, res, conn)
-		shutdownFuncs = append(shutdownFuncs, shutdownMeterProvider)
+		meterProvider, err := initMeterProvider(ctx, res, conn)
+		if err != nil {
+			return
+		}
+		shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	}
 	//
 	if otelCfg.Logging {
-		shutdownLogProvider := initLogProvider(ctx, res, conn)
-		shutdownFuncs = append(shutdownFuncs, shutdownLogProvider)
+		logProvider, err := initLogProvider(ctx, res, conn)
+		if err != nil {
+			return
+		}
+		shutdownFuncs = append(shutdownFuncs, logProvider.Shutdown)
 	}
 }
 

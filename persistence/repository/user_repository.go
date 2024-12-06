@@ -28,10 +28,10 @@ func NewUserRepository(dbCon *sqlx.DB) *UserRepository {
 }
 
 // CreateUser with userEntity
-func (u *UserRepository) CreateUser(c *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
+func (u *UserRepository) CreateUser(ctx *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
 	// implement the logic to create a new user in the database or storage system.
 	insertSQL := "insert into users(name, birthday, gender, photo_url, email, hashed_password, roles) values($1, $2, $3, $4, $5, $6, %7) RETURNING id"
-	stmt := u.prepareStatement(c, insertSQL)
+	stmt := u.prepareStatement(ctx, insertSQL)
 	var id uint
 	err := stmt.Get(&id, user.Name, user.BirthDay, user.Gender, user.PhotoURL, user.Email, user.Password, user.Roles)
 	if err != nil {
@@ -42,10 +42,10 @@ func (u *UserRepository) CreateUser(c *gin.Context, user *entity.UserEntity) (*e
 }
 
 // CreateUser2 with userEntity
-func (u *UserRepository) CreateUser2(c *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
+func (u *UserRepository) CreateUser2(ctx *gin.Context, user *entity.UserEntity) (*entity.UserEntity, error) {
 	// implement the logic to create a new user in the database or storage system.
 	insertSQL := "insert into users(name, birthday, gender, photo_url, email, hashed_password, roles) values(:name, :birthday, :gender, :photo_url, :email, :hashed_password, :roles) RETURNING id"
-	stmt := u.prepareNamed(c, insertSQL)
+	stmt := u.prepareNamed(ctx, insertSQL)
 	var id uint
 	err := stmt.Get(&id, user)
 	if err != nil {
@@ -56,11 +56,11 @@ func (u *UserRepository) CreateUser2(c *gin.Context, user *entity.UserEntity) (*
 }
 
 // GetUser with ID
-func (u *UserRepository) GetUser(c *gin.Context, id uint) (*entity.UserEntity, error) {
+func (u *UserRepository) GetUser(ctx *gin.Context, id uint) (*entity.UserEntity, error) {
 	// to retrieve a user from the database or storage system based on its ID.
-	logging.Debug(c).Msgf("GetUser with id:%v", id)
+	logging.Debug(ctx).Msgf("GetUser with id:%v", id)
 	querySQL := "select * from users where id = $1"
-	stmt := u.prepareStatement(c, querySQL)
+	stmt := u.prepareStatement(ctx, querySQL)
 	var entity entity.UserEntity
 	err := stmt.Get(&entity, id)
 	if err != nil {
@@ -70,11 +70,11 @@ func (u *UserRepository) GetUser(c *gin.Context, id uint) (*entity.UserEntity, e
 }
 
 // GetUserByEmail with Email
-func (u *UserRepository) GetUserByEmail(c *gin.Context, email string) (*entity.UserEntity, error) {
+func (u *UserRepository) GetUserByEmail(ctx *gin.Context, email string) (*entity.UserEntity, error) {
 	// to retrieve a user from the database or storage system based on its ID.
-	logging.Debug(c).Msgf("GetUserByEmail with email:%v", email)
+	logging.Debug(ctx).Msgf("GetUserByEmail with email:%v", email)
 	querySQL := "select * from users where email = $1"
-	stmt := u.prepareStatement(c, querySQL)
+	stmt := u.prepareStatement(ctx, querySQL)
 	var entity entity.UserEntity
 	err := stmt.Get(&entity, email)
 	if err != nil {
@@ -84,9 +84,9 @@ func (u *UserRepository) GetUserByEmail(c *gin.Context, email string) (*entity.U
 }
 
 // UpdateUser with userEntity
-func (u *UserRepository) UpdateUser(c *gin.Context, user *entity.UserEntity) (bool, error) {
+func (u *UserRepository) UpdateUser(ctx *gin.Context, user *entity.UserEntity) (bool, error) {
 	sql := "update users set name = :name, birthday = :birthday, gender = :gender, photo_url = :photo_url, email = :email where id = :id"
-	stmt := u.prepareNamed(c, sql)
+	stmt := u.prepareNamed(ctx, sql)
 	result := stmt.MustExec(user)
 	count, err := result.RowsAffected()
 	if count == 0 || err != nil {
@@ -96,10 +96,10 @@ func (u *UserRepository) UpdateUser(c *gin.Context, user *entity.UserEntity) (bo
 }
 
 // FindUsers with userEntity
-func (u *UserRepository) FindUsers(c *gin.Context) ([]*entity.UserEntity, error) {
+func (u *UserRepository) FindUsers(ctx *gin.Context) ([]*entity.UserEntity, error) {
 	//
 	querySQL := "select id, name, birthday, gender, active, photo_url, email from users"
-	stmt := u.prepareStatement(c, querySQL)
+	stmt := u.prepareStatement(ctx, querySQL)
 	rows, err := stmt.Queryx()
 	if err != nil {
 		return nil, err

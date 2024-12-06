@@ -53,6 +53,7 @@ type OTEL struct {
 	Logging      bool
 	Tracer       bool
 	Metric       bool
+	Stdout       bool
 }
 
 type JWT struct {
@@ -152,6 +153,7 @@ func LoadConf(workingPath, env string) error {
 			Logging:      config.GetBool("otel.exporter.logging"),
 			Tracer:       config.GetBool("otel.exporter.tracer"),
 			Metric:       config.GetBool("otel.exporter.metrics"),
+			Stdout:       config.GetBool("otel.exporter.stdout"),
 		},
 		Security: &Security{
 			JWT: &JWT{

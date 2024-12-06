@@ -24,6 +24,7 @@ otel:
     version: 1.0.0
   insecure: true
   exporter:
+    stdout: true
     endpoint: localhost:14317 #grpc
     logging: false
     tracer: false

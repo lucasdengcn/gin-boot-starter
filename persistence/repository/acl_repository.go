@@ -46,17 +46,17 @@ func NewAclRepository(dbCon *sqlx.DB) *AclRepository {
 }
 
 // AssignRole to user
-func (acl *AclRepository) AssignRole(c *gin.Context, userId uint, role string) (bool, error) {
+func (acl *AclRepository) AssignRole(ctx *gin.Context, userId uint, role string) (bool, error) {
 	return acl.enforcer.AddGroupingPolicy(core.StringFromUint(userId), role)
 }
 
 // RemoveRole from user
-func (acl *AclRepository) RemoveRole(c *gin.Context, userId uint, role string) (bool, error) {
+func (acl *AclRepository) RemoveRole(ctx *gin.Context, userId uint, role string) (bool, error) {
 	return acl.enforcer.RemoveGroupingPolicy(core.StringFromUint(userId), role)
 }
 
 // AssignPolicy to user on object with action
-func (acl *AclRepository) AssignPolicy(c *gin.Context, userId uint, object, act string) (bool, error) {
+func (acl *AclRepository) AssignPolicy(ctx *gin.Context, userId uint, object, act string) (bool, error) {
 	return acl.enforcer.AddPolicy(core.StringFromUint(userId), object, act)
 }
 
@@ -66,7 +66,7 @@ func (acl *AclRepository) HasPolicy(ctx *gin.Context, userId uint, object, act s
 }
 
 // RemovePolicy from user on object with action
-func (acl *AclRepository) RemovePolicy(c *gin.Context, userId uint, object, act string) (bool, error) {
+func (acl *AclRepository) RemovePolicy(ctx *gin.Context, userId uint, object, act string) (bool, error) {
 	return acl.enforcer.RemovePolicy(core.StringFromUint(userId), object, act)
 }
 

@@ -21,12 +21,12 @@ func NewTransactionRepo(dbCon *sqlx.DB) TransactionRepo {
 	}
 }
 
-func (repo *TransactionRepo) prepareStatement(c *gin.Context, sql string) *sqlx.Stmt {
-	tx := db.GetTx(c)
+func (repo *TransactionRepo) prepareStatement(ctx *gin.Context, sql string) *sqlx.Stmt {
+	tx := db.GetTx(ctx)
 	if tx == nil {
 		stmt, err := repo.dbCon.Preparex(sql)
 		if err != nil {
-			logging.Panic(c).Msgf("Preparex statement Error: %v, %v", sql, err)
+			logging.Panic(ctx).Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
@@ -34,27 +34,27 @@ func (repo *TransactionRepo) prepareStatement(c *gin.Context, sql string) *sqlx.
 	{
 		stmt, err := tx.Preparex(sql)
 		if err != nil {
-			logging.Panic(c).Msgf("Preparex statement Error: %v, %v", sql, err)
+			logging.Panic(ctx).Msgf("Preparex statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
 }
 
-func (repo *TransactionRepo) prepareNamed(c *gin.Context, sql string) *sqlx.NamedStmt {
-	tx := db.GetTx(c)
+func (repo *TransactionRepo) prepareNamed(ctx *gin.Context, sql string) *sqlx.NamedStmt {
+	tx := db.GetTx(ctx)
 	if tx == nil {
 		stmt, err := repo.dbCon.PrepareNamed(sql)
 		if err != nil {
-			logging.Panic(c).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
+			logging.Panic(ctx).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
 	//
 	{
-		logging.Debug(c).Msgf("Exec in tx %v", tx)
+		logging.Debug(ctx).Msgf("Exec in tx %v", tx)
 		stmt, err := tx.PrepareNamed(sql)
 		if err != nil {
-			logging.Panic(c).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
+			logging.Panic(ctx).Msgf("PrepareNamed statement Error: %v, %v", sql, err)
 		}
 		return stmt
 	}
