@@ -57,10 +57,7 @@ func Start() {
 	initLogging()
 	//
 	// init OTEL tracing
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-	//
-	otel.InitProviders(ctx)
+	otel.InitProviders(context.Background())
 	//
 	_, err := db.ConnectDB()
 	if err != nil {
@@ -95,9 +92,9 @@ func Start() {
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 1)
 	// kill (no param) default send syscall.SIGTERM
-	// kill -2 is syscall.SIGINT
+	// kill -2 is syscall.SIGINT, Ctrl+C
 	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(quit, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 	//
 	<-quit
 	//

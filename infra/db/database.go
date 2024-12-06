@@ -65,56 +65,58 @@ func Close() {
 }
 
 // BeginTx return context
-func BeginTx(c *gin.Context) {
+func BeginTx(ctx *gin.Context) {
 	if dbSQL == nil {
 		panic("DB not init yet.")
 	}
-	tx, err := dbSQL.BeginTxx(c, nil)
+	tx, err := dbSQL.BeginTxx(ctx, nil)
 	if err != nil {
-		logging.Panic(c).Msgf("Begin Tx Error: %v", err)
+		logging.Panic(ctx).Msgf("Begin Tx Error: %v", err)
 	}
-	c.Set(txKey, tx)
+	ctx.Set(txKey, tx)
 }
 
 // CommitTx return context
-func CommitTx(c *gin.Context) {
-	dbTx := GetTx(c)
+func CommitTx(ctx *gin.Context) {
+	dbTx := GetTx(ctx)
 	if dbTx == nil {
+		logging.Error(ctx).Msgf("tx Commit, but No Tx attached to the context. check the caller chain")
 		return
 	}
 	err := dbTx.Commit()
 	if err != nil {
-		logging.Error(c).Msgf("tx Commit Error. %v", dbTx)
+		logging.Error(ctx).Msgf("tx Commit Error. %v", dbTx)
 		panic(err)
 	}
-	logging.Debug(c).Msgf("tx Commit Success. %v", dbTx)
+	logging.Debug(ctx).Msgf("tx Commit Success. %v", dbTx)
 	dbTx = nil
-	c.Set(txKey, nil)
+	ctx.Set(txKey, nil)
 }
 
 // RollbackTx return error
-func RollbackTx(c *gin.Context) {
-	dbTx := GetTx(c)
+func RollbackTx(ctx *gin.Context) {
+	dbTx := GetTx(ctx)
 	if dbTx == nil {
+		logging.Error(ctx).Msgf("tx Rollback, but No Tx attached to the context. check the caller chain")
 		return
 	}
 	err := dbTx.Rollback()
 	if err != nil {
-		logging.Error(c).Msgf("tx Rollback Error. %v", dbTx)
+		logging.Error(ctx).Msgf("tx Rollback Error. %v", dbTx)
 	} else {
-		logging.Debug(c).Msgf("tx Rollback Success. %v", dbTx)
+		logging.Debug(ctx).Msgf("tx Rollback Success. %v", dbTx)
 	}
 }
 
 // GetTx return sqlx.Tx
-func GetTx(c *gin.Context) *sqlx.Tx {
-	val, exists := c.Get(txKey)
+func GetTx(ctx *gin.Context) *sqlx.Tx {
+	val, exists := ctx.Get(txKey)
 	if val == nil || !exists {
 		return nil
 	}
 	dbTx, ok := val.(*sqlx.Tx)
 	if !ok {
-		logging.Panic(c).Msgf("Can't Convert Tx object from context. %v", dbTx)
+		logging.Panic(ctx).Msgf("Can't Convert Tx object from context. %v", dbTx)
 	}
 	return dbTx
 }
