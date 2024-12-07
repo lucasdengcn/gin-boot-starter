@@ -103,3 +103,13 @@ Always set DEFAULT value on database table column, so that can avoid can't conve
 ```shell
 git config core.hooksPath .git-hooks 
 ```
+
+## Tools
+
+[revive](https://revive.run/docs)
+
+[pre-commit](https://pre-commit.com/hooks.html)
+
+[golangci-lint](https://golangci-lint.run/)
+
+Golangci-lint aggregates dozens of tools with hundreds of checks. Revive is one of such tools
