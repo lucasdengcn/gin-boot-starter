@@ -97,3 +97,9 @@ Always set DEFAULT value on database table column, so that can avoid can't conve
 ## Performance Reference
 
 [DB Packages](https://blog.jetbrains.com/go/2023/04/27/comparing-db-packages/)
+
+## Git hooks
+
+```shell
+git config core.hooksPath .git-hooks 
+```
