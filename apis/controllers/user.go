@@ -15,7 +15,6 @@ import (
 
 // UserController struct
 type UserController struct {
-	ControllerBase
 	userService *services.UserService
 	aclService  *services.AclService
 }
@@ -96,28 +95,28 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router /users/v1/:id [PUT]
-func (uc *UserController) UpdateUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+func (uc *UserController) UpdateUser(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, exception.NewProblemValidationDetail("id", err.Error(), c))
+		ctx.JSON(http.StatusBadRequest, exception.NewProblemValidationDetail("id", err.Error(), ctx))
 		return
 	}
 	var m models.UserInfoUpdate
-	if err := c.ShouldBind(&m); err != nil {
-		c.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, c))
+	if err := ctx.ShouldBind(&m); err != nil {
+		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return
 	}
 	// given the request would modify data, then it should be in tx scope
-	db.BeginTx(c)
+	db.BeginTx(ctx)
 	defer func() {
 		err := recover()
-		uc.deferTxCallback(c, err)
+		db.RecoverErrorHandle(ctx, err)
 	}()
 	//
-	user := uc.userService.UpdateUser(c, uint(id), &m)
+	user := uc.userService.UpdateUser(ctx, uint(id), &m)
 	// other service
 	// other service
 	// finally
 	//
-	c.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, user)
 }

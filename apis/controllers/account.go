@@ -14,7 +14,6 @@ import (
 )
 
 type AccountController struct {
-	ControllerBase
 	userService *services.UserService
 	aclService  *services.AclService
 }
@@ -47,7 +46,7 @@ func (c *AccountController) SignUp(ctx *gin.Context) {
 	db.BeginTx(ctx)
 	defer func() {
 		err := recover()
-		c.deferTxCallback(ctx, err)
+		db.RecoverErrorHandle(ctx, err)
 	}()
 	//
 	user := c.userService.CreateUser(ctx, &m)

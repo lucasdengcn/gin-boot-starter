@@ -2,6 +2,7 @@ package db
 
 import (
 	"gin-boot-starter/core/config"
+	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"sync"
 
@@ -119,4 +120,14 @@ func GetTx(ctx *gin.Context) *sqlx.Tx {
 		logging.Panic(ctx).Msgf("Can't Convert Tx object from context. %v", dbTx)
 	}
 	return dbTx
+}
+
+// RecoverErrorHandle, to recover from panic.
+func RecoverErrorHandle(ctx *gin.Context, r any) {
+	if r != nil {
+		RollbackTx(ctx)
+		exception.ResponseOnError(ctx, r)
+	} else {
+		CommitTx(ctx)
+	}
 }
