@@ -1,7 +1,7 @@
-package services
+package service
 
 import (
-	"gin-boot-starter/apis/models"
+	"gin-boot-starter/api/model"
 	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
@@ -28,8 +28,8 @@ func NewUserService(repository *repository.UserRepository) *UserService {
 	return instanceUserService
 }
 
-func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {
-	return &models.UserInfo{
+func (s *UserService) mapToModel(ue *entity.UserEntity) *model.UserInfo {
+	return &model.UserInfo{
 		ID:        ue.ID,
 		Name:      ue.Name,
 		BirthDay:  ue.BirthDay,
@@ -42,14 +42,14 @@ func (s *UserService) mapToModel(ue *entity.UserEntity) *models.UserInfo {
 }
 
 // GetUsers return array of UserInfo
-func (s *UserService) GetUsers(ctx *gin.Context) []*models.UserInfo {
+func (s *UserService) GetUsers(ctx *gin.Context) []*model.UserInfo {
 	// implement the logic to get users from database or any other data source
 	list, err := s.userRepository.FindUsers(ctx)
 	if err != nil {
 		logging.Error(ctx).Err(err).Msgf("UserRepository.FindUsers error.")
 		panic(exception.NewRepositoryError(ctx, "USER_GETS_500", err.Error()))
 	}
-	var result []*models.UserInfo
+	var result []*model.UserInfo
 	for _, ue := range list {
 		result = append(result, s.mapToModel(ue))
 	}
@@ -57,7 +57,7 @@ func (s *UserService) GetUsers(ctx *gin.Context) []*models.UserInfo {
 }
 
 // GetUser with id return UserInfo
-func (s *UserService) GetUser(ctx *gin.Context, id uint) *models.UserInfo {
+func (s *UserService) GetUser(ctx *gin.Context, id uint) *model.UserInfo {
 	// implement the logic to get user by id from database or any other data source
 	logging.Debug(ctx).Msgf("GetUser with id:%v", id)
 	ue, err := s.userRepository.GetUser(ctx, id)
@@ -72,7 +72,7 @@ func (s *UserService) GetUser(ctx *gin.Context, id uint) *models.UserInfo {
 }
 
 // CreateUser with UserEntity and return UserInfo
-func (s *UserService) CreateUser(ctx *gin.Context, signUp *models.UserSignUp) *models.UserInfo {
+func (s *UserService) CreateUser(ctx *gin.Context, signUp *model.UserSignUp) *model.UserInfo {
 	// implement the logic to create a new user in database or any other data source
 	hashPassword, err := security.HashPassword(signUp.Password)
 	if err != nil {
@@ -97,7 +97,7 @@ func (s *UserService) CreateUser(ctx *gin.Context, signUp *models.UserSignUp) *m
 }
 
 // UpdateUser with id, UserInfoUpdate, return UserInfo
-func (s *UserService) UpdateUser(ctx *gin.Context, id uint, userInfoUpdate *models.UserInfoUpdate) *models.UserInfo {
+func (s *UserService) UpdateUser(ctx *gin.Context, id uint, userInfoUpdate *model.UserInfoUpdate) *model.UserInfo {
 	// implement the logic to update an existing user in database or any other data source
 	ue := entity.UserEntity{
 		ID:       id,
@@ -128,7 +128,7 @@ func (s *UserService) DeleteUser(ctx *gin.Context, id uint) error {
 }
 
 // VerifyPassword sign in user and verify password
-func (s *UserService) VerifyPassword(ctx *gin.Context, signIn *models.UserSignIn) *models.UserInfo {
+func (s *UserService) VerifyPassword(ctx *gin.Context, signIn *model.UserSignIn) *model.UserInfo {
 	// implement the logic to sign in user in database or any other data source
 	ue, err := s.userRepository.GetUserByEmail(ctx, signIn.Email)
 	if err != nil {

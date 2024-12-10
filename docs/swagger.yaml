@@ -1,6 +1,17 @@
 basePath: /
 definitions:
-  models.UserInfo:
+  model.AuthTokens:
+    properties:
+      access_token:
+        type: string
+      at_expire_in:
+        type: string
+      refresh_token:
+        type: string
+      rt_expire_in:
+        type: string
+    type: object
+  model.UserInfo:
     properties:
       birthday:
         type: string
@@ -9,6 +20,7 @@ definitions:
       email:
         type: string
       gender:
+        example: male, female
         type: string
       id:
         type: integer
@@ -19,19 +31,22 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.UserInfoUpdate:
+  model.UserInfoUpdate:
     properties:
       birthday:
         type: string
       email:
         type: string
       gender:
+        example: male, female
         type: string
       id:
         type: integer
       name:
         type: string
       photo_url:
+        type: string
+      status:
         type: string
     required:
     - birthday
@@ -40,16 +55,30 @@ definitions:
     - id
     - name
     - photo_url
+    - status
     type: object
-  models.UserSignUp:
+  model.UserSignIn:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  model.UserSignUp:
     properties:
       birthday:
         type: string
       email:
         type: string
       gender:
+        example: male, female
         type: string
       name:
+        type: string
+      password:
         type: string
       photo_url:
         type: string
@@ -58,6 +87,7 @@ definitions:
     - email
     - gender
     - name
+    - password
     - photo_url
     type: object
 host: localhost:8080
@@ -74,6 +104,66 @@ info:
   title: Gin Swagger Example API
   version: "1.0"
 paths:
+  /accounts/v1/signin:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user input
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSignIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthTokens'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: SignIn user on user demand.
+      tags:
+      - AccountController
+  /accounts/v1/signup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user input
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSignUp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.UserInfo'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create account on user demand.
+      tags:
+      - AccountController
   /users/v1/:id:
     get:
       consumes:
@@ -90,7 +180,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserInfo'
+            $ref: '#/definitions/model.UserInfo'
         "400":
           description: Bad Request
           schema: {}
@@ -112,14 +202,14 @@ paths:
         name: model
         required: true
         schema:
-          $ref: '#/definitions/models.UserInfoUpdate'
+          $ref: '#/definitions/model.UserInfoUpdate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserInfo'
+            $ref: '#/definitions/model.UserInfo'
         "400":
           description: Bad Request
           schema: {}
@@ -153,7 +243,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserInfo'
+            $ref: '#/definitions/model.UserInfo'
         "400":
           description: Bad Request
           schema: {}
@@ -166,24 +256,17 @@ paths:
       summary: Query users in paging.
       tags:
       - UserController
-  /users/v1/signin:
-    post:
+  /users/v1/session:
+    get:
       consumes:
       - application/json
-      parameters:
-      - description: user input
-        in: body
-        name: model
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserSignUp'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserInfo'
+            $ref: '#/definitions/model.UserInfo'
         "400":
           description: Bad Request
           schema: {}
@@ -193,37 +276,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: SignIn user on user demand.
-      tags:
-      - UserController
-  /users/v1/signup:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: user input
-        in: body
-        name: model
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserSignUp'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.UserInfo'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Create account on user demand.
+      summary: Get current user information.
       tags:
       - UserController
 schemes:

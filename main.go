@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"gin-boot-starter/core/config"
-	"gin-boot-starter/migrations"
+	"gin-boot-starter/core/migration"
 	"gin-boot-starter/server"
 	"os"
 )
@@ -46,9 +46,12 @@ func main() {
 	//
 	fmt.Printf("running in %v, env: %v\n", basePath, envName)
 	// load configuration
-	config.LoadConf(basePath, envName)
+	err := config.LoadConf(basePath, envName)
+	if err != nil {
+		os.Exit(1)
+	}
 	// build up db schema
-	migrations.Build()
+	migration.Build()
 	//
 	server.Start()
 }

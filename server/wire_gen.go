@@ -7,48 +7,48 @@
 package server
 
 import (
-	"gin-boot-starter/apis/controllers"
+	"gin-boot-starter/api/controller"
 	"gin-boot-starter/infra/db"
 	"gin-boot-starter/persistence/repository"
-	"gin-boot-starter/services"
+	"gin-boot-starter/service"
 	"github.com/google/wire"
 )
 
 // Injectors from wire_injector.go:
 
 // InitializeUserController injector
-func InitializeUserController() *controllers.UserController {
+func InitializeUserController() *controller.UserController {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
-	userService := services.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository)
 	aclRepository := repository.NewAclRepository(sqlxDB)
-	aclService := services.NewAclService(aclRepository)
-	userController := controllers.NewUserController(userService, aclService)
+	aclService := service.NewAclService(aclRepository)
+	userController := controller.NewUserController(userService, aclService)
 	return userController
 }
 
-func InitializeAccountController() *controllers.AccountController {
+func InitializeAccountController() *controller.AccountController {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
-	userService := services.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository)
 	aclRepository := repository.NewAclRepository(sqlxDB)
-	aclService := services.NewAclService(aclRepository)
-	accountController := controllers.NewAccountController(userService, aclService)
+	aclService := service.NewAclService(aclRepository)
+	accountController := controller.NewAccountController(userService, aclService)
 	return accountController
 }
 
-func InitializeUserService() *services.UserService {
+func InitializeUserService() *service.UserService {
 	sqlxDB := db.GetDBCon()
 	userRepository := repository.NewUserRepository(sqlxDB)
-	userService := services.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository)
 	return userService
 }
 
 // InitializeAclService injector
-func InitializeAclService() *services.AclService {
+func InitializeAclService() *service.AclService {
 	sqlxDB := db.GetDBCon()
 	aclRepository := repository.NewAclRepository(sqlxDB)
-	aclService := services.NewAclService(aclRepository)
+	aclService := service.NewAclService(aclRepository)
 	return aclService
 }
 
@@ -58,7 +58,7 @@ func InitializeAclService() *services.AclService {
 var dbSet = wire.NewSet(db.GetDBCon)
 
 // ProviderSet
-var aclServiceSet = wire.NewSet(repository.NewAclRepository, services.NewAclService)
+var aclServiceSet = wire.NewSet(repository.NewAclRepository, service.NewAclService)
 
 // ProviderSet
-var userServiceSet = wire.NewSet(repository.NewUserRepository, services.NewUserService)
+var userServiceSet = wire.NewSet(repository.NewUserRepository, service.NewUserService)

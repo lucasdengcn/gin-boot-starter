@@ -1,0 +1,1 @@
+migrate create -ext sql -dir migration/schemas/ -seq $1

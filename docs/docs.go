@@ -24,6 +24,96 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/accounts/v1/signin": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AccountController"
+                ],
+                "summary": "SignIn user on user demand.",
+                "parameters": [
+                    {
+                        "description": "user input",
+                        "name": "model",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserSignIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AuthTokens"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/accounts/v1/signup": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AccountController"
+                ],
+                "summary": "Create account on user demand.",
+                "parameters": [
+                    {
+                        "description": "user input",
+                        "name": "model",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserSignUp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/users/v1/:id": {
             "get": {
                 "consumes": [
@@ -49,7 +139,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserInfo"
+                            "$ref": "#/definitions/model.UserInfo"
                         }
                     },
                     "400": {
@@ -84,7 +174,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserInfoUpdate"
+                            "$ref": "#/definitions/model.UserInfoUpdate"
                         }
                     }
                 ],
@@ -92,7 +182,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserInfo"
+                            "$ref": "#/definitions/model.UserInfo"
                         }
                     },
                     "400": {
@@ -142,7 +232,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserInfo"
+                            "$ref": "#/definitions/model.UserInfo"
                         }
                     },
                     "400": {
@@ -160,8 +250,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/v1/signin": {
-            "post": {
+        "/users/v1/session": {
+            "get": {
                 "consumes": [
                     "application/json"
                 ],
@@ -171,68 +261,12 @@ const docTemplate = `{
                 "tags": [
                     "UserController"
                 ],
-                "summary": "SignIn user on user demand.",
-                "parameters": [
-                    {
-                        "description": "user input",
-                        "name": "model",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UserSignUp"
-                        }
-                    }
-                ],
+                "summary": "Get current user information.",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserInfo"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/users/v1/signup": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "UserController"
-                ],
-                "summary": "Create account on user demand.",
-                "parameters": [
-                    {
-                        "description": "user input",
-                        "name": "model",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UserSignUp"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.UserInfo"
+                            "$ref": "#/definitions/model.UserInfo"
                         }
                     },
                     "400": {
@@ -252,7 +286,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.UserInfo": {
+        "model.AuthTokens": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "at_expire_in": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "rt_expire_in": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UserInfo": {
             "type": "object",
             "properties": {
                 "birthday": {
@@ -265,7 +316,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "male, female"
                 },
                 "id": {
                     "type": "integer"
@@ -281,7 +333,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserInfoUpdate": {
+        "model.UserInfoUpdate": {
             "type": "object",
             "required": [
                 "birthday",
@@ -289,7 +341,8 @@ const docTemplate = `{
                 "gender",
                 "id",
                 "name",
-                "photo_url"
+                "photo_url",
+                "status"
             ],
             "properties": {
                 "birthday": {
@@ -299,7 +352,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "male, female"
                 },
                 "id": {
                     "type": "integer"
@@ -309,16 +363,35 @@ const docTemplate = `{
                 },
                 "photo_url": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
-        "models.UserSignUp": {
+        "model.UserSignIn": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UserSignUp": {
             "type": "object",
             "required": [
                 "birthday",
                 "email",
                 "gender",
                 "name",
+                "password",
                 "photo_url"
             ],
             "properties": {
@@ -329,9 +402,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "male, female"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "photo_url": {

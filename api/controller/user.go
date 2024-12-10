@@ -1,12 +1,12 @@
-package controllers
+package controller
 
 import (
-	"gin-boot-starter/apis/models"
+	"gin-boot-starter/api/model"
 	"gin-boot-starter/core"
 	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/infra/db"
-	"gin-boot-starter/services"
+	"gin-boot-starter/service"
 	"net/http"
 	"strconv"
 
@@ -15,12 +15,12 @@ import (
 
 // UserController struct
 type UserController struct {
-	userService *services.UserService
-	aclService  *services.AclService
+	userService *service.UserService
+	aclService  *service.AclService
 }
 
 // NewUserController with dependencies services
-func NewUserController(UserService *services.UserService, AclService *services.AclService) *UserController {
+func NewUserController(UserService *service.UserService, AclService *service.AclService) *UserController {
 	return &UserController{userService: UserService, aclService: AclService}
 }
 
@@ -30,7 +30,7 @@ func NewUserController(UserService *services.UserService, AclService *services.A
 // @Tags UserController
 // @Accept application/json
 // @Produce json
-// @Success 200 {object} models.UserInfo
+// @Success 200 {object} model.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -48,7 +48,7 @@ func (uc *UserController) GetCurrentUser(ctx *gin.Context) {
 // @Accept application/json
 // @Produce json
 // @Param        id   path      int  true  "Account ID"
-// @Success 200 {object} models.UserInfo
+// @Success 200 {object} model.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -74,7 +74,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 // @Produce json
 // @Param        size   path      int  true  "amount of items to return"
 // @Param        page   path      int  true  "current page index"
-// @Success 200 {object} models.UserInfo
+// @Success 200 {object} model.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -89,8 +89,8 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 // @Tags UserController
 // @Accept application/json
 // @Produce json
-// @Param model body models.UserInfoUpdate true "user info"
-// @Success 200 {object} models.UserInfo
+// @Param model body model.UserInfoUpdate true "user info"
+// @Success 200 {object} model.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -101,7 +101,7 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, exception.NewProblemValidationDetail("id", err.Error(), ctx))
 		return
 	}
-	var m models.UserInfoUpdate
+	var m model.UserInfoUpdate
 	if err := ctx.ShouldBind(&m); err != nil {
 		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return

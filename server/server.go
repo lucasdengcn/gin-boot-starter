@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/otel"
-	"gin-boot-starter/core/validators"
+	validators "gin-boot-starter/core/validator"
 	"gin-boot-starter/infra/db"
 	"io"
 	"net/http"

@@ -1,7 +1,8 @@
-package migrations
+package migration
 
 import (
 	"errors"
+	"fmt"
 	"gin-boot-starter/core/config"
 	"log"
 
@@ -14,7 +15,8 @@ import (
 // Build DB schema
 func Build() {
 	cfg := config.GetConfig()
-	m, err := migrate.New("file://migrations/schemas", cfg.DataSource.URL)
+	path := fmt.Sprintf("file://%s/migration/schemas", cfg.Application.WorkingPath)
+	m, err := migrate.New(path, cfg.DataSource.URL)
 	if err != nil {
 		log.Fatal(err)
 	}

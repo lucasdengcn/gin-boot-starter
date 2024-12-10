@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"gin-boot-starter/core/exception"

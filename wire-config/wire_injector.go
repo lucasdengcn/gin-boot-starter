@@ -1,10 +1,10 @@
 package server
 
 import (
-	"gin-boot-starter/apis/controllers"
+	"gin-boot-starter/api/controller"
 	"gin-boot-starter/infra/db"
 	"gin-boot-starter/persistence/repository"
-	"gin-boot-starter/services"
+	"gin-boot-starter/service"
 
 	"github.com/google/wire"
 )
@@ -13,29 +13,29 @@ import (
 var dbSet = wire.NewSet(db.GetDBCon)
 
 // ProviderSet
-var aclServiceSet = wire.NewSet(repository.NewAclRepository, services.NewAclService)
+var aclServiceSet = wire.NewSet(repository.NewAclRepository, service.NewAclService)
 
 // ProviderSet
-var userServiceSet = wire.NewSet(repository.NewUserRepository, services.NewUserService)
+var userServiceSet = wire.NewSet(repository.NewUserRepository, service.NewUserService)
 
 // InitializeUserController injector
-func InitializeUserController() *controllers.UserController {
-	wire.Build(dbSet, userServiceSet, aclServiceSet, controllers.NewUserController)
-	return &controllers.UserController{}
+func InitializeUserController() *controller.UserController {
+	wire.Build(dbSet, userServiceSet, aclServiceSet, controller.NewUserController)
+	return &controller.UserController{}
 }
 
-func InitializeAccountController() *controllers.AccountController {
-	wire.Build(dbSet, userServiceSet, aclServiceSet, controllers.NewAccountController)
-	return &controllers.AccountController{}
+func InitializeAccountController() *controller.AccountController {
+	wire.Build(dbSet, userServiceSet, aclServiceSet, controller.NewAccountController)
+	return &controller.AccountController{}
 }
 
-func InitializeUserService() *services.UserService {
+func InitializeUserService() *service.UserService {
 	wire.Build(dbSet, userServiceSet)
-	return &services.UserService{}
+	return &service.UserService{}
 }
 
 // InitializeAclService injector
-func InitializeAclService() *services.AclService {
+func InitializeAclService() *service.AclService {
 	wire.Build(dbSet, aclServiceSet)
-	return &services.AclService{}
+	return &service.AclService{}
 }

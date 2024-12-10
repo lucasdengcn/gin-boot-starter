@@ -100,9 +100,8 @@ func intValue(v *viper.Viper, cfgKey, envKey string, defaultValue int) int {
 // (external lib) and returns the configuration struct.
 func LoadConf(workingPath, env string) error {
 	var err error
-	var config *viper.Viper
 	//
-	config = viper.New()
+	config := viper.New()
 	config.SetConfigType("yaml")
 	config.SetConfigName("application")
 	config.AddConfigPath(workingPath + "/config")
@@ -121,7 +120,11 @@ func LoadConf(workingPath, env string) error {
 		log.Println("error on parsing env configuration file")
 		return err
 	}
-	config.MergeConfigMap(envConfig.AllSettings())
+	err = config.MergeConfigMap(envConfig.AllSettings())
+	if err != nil {
+		log.Println("error on merging configuration", err)
+		return err
+	}
 	//
 	_appConfig := &Configuration{
 		Application: &Application{
@@ -138,7 +141,7 @@ func LoadConf(workingPath, env string) error {
 			PoolMin: config.GetInt("datasource.pool.min"),
 		},
 		Server: &Server{
-			Port: config.GetString("server.port"),
+			Port: value(config, "server.port", "APP_PORT", "8080"),
 		},
 		Logging: &Logging{
 			Level:  value(config, "logging.level", "APP_LOGGING_LEVEL", "debug"),
@@ -172,13 +175,6 @@ func LoadConf(workingPath, env string) error {
 	appConfig = _appConfig
 	log.Printf("Configuration load success. %v\n", appConfig.Application.Name)
 	return nil
-}
-
-func relativePath(basedir string, path *string) {
-	p := *path
-	if len(p) > 0 && p[0] != '/' {
-		*path = filepath.Join(basedir, p)
-	}
 }
 
 func GetBasePath() string {

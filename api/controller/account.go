@@ -1,24 +1,24 @@
-package controllers
+package controller
 
 import (
-	"gin-boot-starter/apis/models"
+	"gin-boot-starter/api/model"
 	"gin-boot-starter/core"
 	"gin-boot-starter/core/exception"
 	"gin-boot-starter/core/logging"
 	"gin-boot-starter/core/security"
 	"gin-boot-starter/infra/db"
-	"gin-boot-starter/services"
+	"gin-boot-starter/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AccountController struct {
-	userService *services.UserService
-	aclService  *services.AclService
+	userService *service.UserService
+	aclService  *service.AclService
 }
 
-func NewAccountController(userService *services.UserService, aclService *services.AclService) *AccountController {
+func NewAccountController(userService *service.UserService, aclService *service.AclService) *AccountController {
 	return &AccountController{
 		userService: userService,
 		aclService:  aclService,
@@ -31,14 +31,14 @@ func NewAccountController(userService *services.UserService, aclService *service
 // @Tags AccountController
 // @Accept application/json
 // @Produce json
-// @Param model body models.UserSignUp true "user input"
-// @Success 201 {object} models.UserInfo
+// @Param model body model.UserSignUp true "user input"
+// @Success 201 {object} model.UserInfo
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router /accounts/v1/signup [POST]
 func (c *AccountController) SignUp(ctx *gin.Context) {
-	var m models.UserSignUp
+	var m model.UserSignUp
 	if err := ctx.ShouldBind(&m); err != nil {
 		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return
@@ -61,15 +61,15 @@ func (c *AccountController) SignUp(ctx *gin.Context) {
 // @Tags AccountController
 // @Accept application/json
 // @Produce json
-// @Param model body models.UserSignIn true "user input"
-// @Success 200 {object} models.AuthTokens
+// @Param model body model.UserSignIn true "user input"
+// @Success 200 {object} model.AuthTokens
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router /accounts/v1/signin [POST]
 func (c *AccountController) SignIn(ctx *gin.Context) {
 	//
-	var m models.UserSignIn
+	var m model.UserSignIn
 	if err := ctx.ShouldBind(&m); err != nil {
 		ctx.JSON(http.StatusBadRequest, exception.NewProblemBindingDetail(err, ctx))
 		return
@@ -86,7 +86,7 @@ func (c *AccountController) SignIn(ctx *gin.Context) {
 		logging.Error(ctx).Err(err).Msg("signing refresh token error")
 	}
 	//
-	ctx.JSON(http.StatusCreated, models.AuthTokens{
+	ctx.JSON(http.StatusCreated, model.AuthTokens{
 		AccessToken:       accessToken,
 		RefreshToken:      refreshToken,
 		ExpireIn:          &expireTime,

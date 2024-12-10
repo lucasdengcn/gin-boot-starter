@@ -1,10 +1,10 @@
 package server
 
 import (
-	"gin-boot-starter/apis/controllers"
+	"gin-boot-starter/api/controller"
 	"gin-boot-starter/core/config"
 	"gin-boot-starter/core/logging"
-	"gin-boot-starter/core/middlewares"
+	"gin-boot-starter/core/middleware"
 
 	// server as OAS
 	_ "gin-boot-starter/docs"
@@ -33,12 +33,12 @@ func NewRouter() *gin.Engine {
 	}))
 	//
 	router.Use(gin.Recovery())
-	router.Use(middlewares.ErrorHandler())
-	router.Use(middlewares.SecurityHandler())
+	router.Use(middleware.ErrorHandler())
+	router.Use(middleware.SecurityHandler())
 	router.Use(otelgin.Middleware(config.GetConfig().OTEL.ServiceName))
 
 	//
-	health := controllers.NewHealthController()
+	health := controller.NewHealthController()
 	router.GET("/health", health.Status)
 
 	// pprof
@@ -51,7 +51,7 @@ func NewRouter() *gin.Engine {
 	})
 	pprof.RouteRegister(debugGroup, "pprof")
 
-	userGroup := router.Group("users", middlewares.AuthJwtHandler())
+	userGroup := router.Group("users", middleware.AuthJwtHandler())
 	{
 		user := InitializeUserController()
 		userGroup.GET("/v1/paging/:size/:page", user.GetUsers)

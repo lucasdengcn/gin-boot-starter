@@ -4,4 +4,4 @@ set -e
 
 cd /app
 
-./gin-runner -e ${APP_ENV} -cfg ${APP_CFG}
+./app-runner -e ${APP_ENV} -w ${APP_BASE}

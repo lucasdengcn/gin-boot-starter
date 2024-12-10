@@ -1,4 +1,4 @@
-package validators
+package validator
 
 import (
 	"gin-boot-starter/core/enums"
